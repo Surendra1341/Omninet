@@ -41,6 +41,7 @@ function NoteDetailModal({
     const fileInputRef = useRef(null);
     const [fileActionItem, setFileActionItem] = useState(null);
     const [isFileActionWorking, setIsFileActionWorking] = useState(false);
+    const [attachmentMode, setAttachmentMode] = useState('keep'); // 'keep', 'replace', 'remove', 'none'
 
     useEffect(() => {
         if (note) {
@@ -53,9 +54,11 @@ function NoteDetailModal({
                     name: note.category?.name || 'Select Category' 
                 }
             });
+            setFile(null);
             setFilePreview(null);
+            setAttachmentMode(note.fileDetails ? 'keep' : 'none');
         }
-    }, [note]);
+    }, [note, isEditing]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -131,7 +134,9 @@ function NoteDetailModal({
 
     const handleEditSubmit = (e) => {
         e.preventDefault();
-        onEdit(editNote, file);
+        const fileToSend = attachmentMode === 'replace' ? file : null;
+        const removeAttachment = attachmentMode === 'remove';
+        onEdit(editNote, fileToSend, removeAttachment);
         setIsEditing(false);
     };
 
@@ -350,60 +355,130 @@ function NoteDetailModal({
                                     />
                                 </div>
 
-                                {/* File Upload */}
+                                {/* Attachment in Edit Mode */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Update File
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                        Attachment
                                     </label>
-                                    <div className="space-y-2">
-                                        <input
-                                            type="file"
-                                            ref={fileInputRef}
-                                            onChange={handleFileChange}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-600 dark:file:text-gray-300"
-                                            accept="*/*"
-                                            required
-                                        />
-                                        
-                                        {filePreview && (
-                                            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3">
-                                                        {filePreview.type === 'image' ? (
-                                                            <img 
-                                                                src={filePreview.url} 
-                                                                alt="Preview" 
-                                                                className="w-10 h-10 object-cover rounded"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
-                                                                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                </svg>
-                                                            </div>
-                                                        )}
-                                                        <div>
-                                                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                                {filePreview.name}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {formatFileSize(filePreview.size)}
-                                                            </p>
-                                                        </div>
+
+                                    {/* Case 1: Note has an existing file and user is keeping it */}
+                                    {note.fileDetails && attachmentMode === 'keep' && (
+                                        <div className="flex items-center justify-between p-3.5 rounded-xl border border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-950/20">
+                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400">
+                                                    <DocumentIcon className="w-5 h-5" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                                            {note.fileDetails.displayFileName}
+                                                        </p>
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                                            Current file
+                                                        </span>
                                                     </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleRemoveFile}
-                                                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                                                    >
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                    </button>
+                                                    {note.fileDetails.fileSize ? (
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {formatFileSize(note.fileDetails.fileSize)}
+                                                        </p>
+                                                    ) : null}
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
+                                            <div className="flex items-center gap-2 shrink-0 ml-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setAttachmentMode('replace');
+                                                        setFile(null);
+                                                        setFilePreview(null);
+                                                    }}
+                                                    className="btn btn-ghost btn-xs text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                                                >
+                                                    Replace
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setAttachmentMode('remove');
+                                                        setFile(null);
+                                                        setFilePreview(null);
+                                                    }}
+                                                    className="btn btn-ghost btn-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Case 2: User chose to remove existing attachment */}
+                                    {note.fileDetails && attachmentMode === 'remove' && (
+                                        <div className="flex items-center justify-between p-3 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 text-red-700 dark:text-red-300">
+                                            <span className="text-sm">Attachment will be removed when updated.</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setAttachmentMode('keep')}
+                                                className="btn btn-ghost btn-xs text-blue-600 dark:text-blue-400"
+                                            >
+                                                Undo (Keep file)
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Case 3: Choosing a new file or replacing */}
+                                    {(!note.fileDetails || attachmentMode === 'replace') && (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="file"
+                                                    ref={fileInputRef}
+                                                    onChange={handleFileChange}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-600 dark:file:text-gray-300"
+                                                    accept="*/*"
+                                                />
+                                                {note.fileDetails && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setAttachmentMode('keep');
+                                                            setFile(null);
+                                                            setFilePreview(null);
+                                                        }}
+                                                        className="btn btn-ghost btn-sm text-gray-500 shrink-0"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {filePreview && (
+                                                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-3">
+                                                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
+                                                                <DocumentIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                                    {filePreview.name}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                    {formatFileSize(filePreview.size)}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleRemoveFile}
+                                                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                                        >
+                                                            <CloseIcon className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Form Actions */}

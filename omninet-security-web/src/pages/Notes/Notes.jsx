@@ -9,7 +9,7 @@ import NotesGrid from '../../components/Notes/NotesGrid';
 import Category from '../Category/Category';
 import storageClient from '../../services/storageClient';
 import toast, { Toaster } from 'react-hot-toast';
-import { DocumentTextIcon, TagIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, TagIcon, TrashIcon, Squares2X2Icon, Bars3Icon } from '@heroicons/react/24/outline';
 
 function Notes() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -37,6 +37,9 @@ function Notes() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+    const [quickFilter, setQuickFilter] = useState('all'); // 'all' | 'pinned' | 'favorites'
+    const [emptyConfirmOpen, setEmptyConfirmOpen] = useState(false);
     const pageSizeDropdownRef = useRef(null);
 
 
@@ -187,7 +190,7 @@ function Notes() {
         setSelectedNote(null);
     };
 
-    const handleEditNote = async (noteData, fileData) => {
+    const handleEditNote = async (noteData, fileData, removeAttachment = false) => {
         if (!noteData.title.trim() || !noteData.description.trim() || !noteData.category.id) {
             toast.error('Please fill in all fields and select a category');
             return;
@@ -196,32 +199,22 @@ function Notes() {
         try {
             setIsSubmitting(true);
             
-            if(fileData===null) {
-                console.log("File not data present");
-                await notesAPI.updateNote({
-                    id: noteData.id,
-                    title: noteData.title.trim(),
-                    description: noteData.description.trim(),
-                    category: {
-                        id: noteData.category.id,
-                        name: noteData.category.name
-                    }
+            const payload = {
+                id: noteData.id,
+                title: noteData.title.trim(),
+                description: noteData.description.trim(),
+                category: {
+                    id: noteData.category.id,
+                    name: noteData.category.name
+                },
+                removeAttachment: removeAttachment
+            };
 
-                });
-            } else {
-                console.log("File data present");
-
-                await notesAPI.updateNote({
-                    id: noteData.id,
-                    title: noteData.title.trim(),
-                    description: noteData.description.trim(),
-                    category: {
-                        id: noteData.category.id,
-                        name: noteData.category.name
-                    },
-                    file: fileData
-                });
+            if (fileData) {
+                payload.file = fileData;
             }
+
+            await notesAPI.updateNote(payload);
 
             if (currentView === 'recycled') {
                 handleRecycleBin();
@@ -241,6 +234,32 @@ function Notes() {
             });
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleTogglePin = async (note) => {
+        try {
+            const willPin = !note.isPinned;
+            setNotes(prev => prev.map(n => n.id === note.id ? { ...n, isPinned: willPin } : n));
+            await notesAPI.togglePin(note.id);
+            toast.success(willPin ? 'Note pinned to top' : 'Note unpinned');
+        } catch (error) {
+            console.error('Error toggling pin:', error);
+            toast.error('Failed to update pin status');
+            fetchAndFilterNotes(selectedCategory, pagination.pageNo, pagination.pageSize);
+        }
+    };
+
+    const handleToggleFavorite = async (note) => {
+        try {
+            const willFav = !note.isFavorite;
+            setNotes(prev => prev.map(n => n.id === note.id ? { ...n, isFavorite: willFav } : n));
+            await notesAPI.toggleFavorite(note.id);
+            toast.success(willFav ? 'Marked as favorite' : 'Removed from favorites');
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            toast.error('Failed to update favorite status');
+            fetchAndFilterNotes(selectedCategory, pagination.pageNo, pagination.pageSize);
         }
     };
 
@@ -779,6 +798,66 @@ function Notes() {
                         </div>
                     </form>
 
+                    {/* Quick Filter Chips */}
+                    {currentView !== 'recycled' && !isSearching && (
+                        <div className="max-w-7xl mx-auto px-4 pt-1 pb-3 flex items-center justify-center gap-2 flex-wrap">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setQuickFilter('all');
+                                    setSelectedCategory('All categories');
+                                    fetchAndFilterNotes('All categories', 0, pagination.pageSize);
+                                }}
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                                    quickFilter === 'all' && selectedCategory === 'All categories'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                All Notes
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setQuickFilter(quickFilter === 'pinned' ? 'all' : 'pinned')}
+                                className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                                    quickFilter === 'pinned'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                <span>📌 Pinned</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setQuickFilter(quickFilter === 'favorites' ? 'all' : 'favorites')}
+                                className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                                    quickFilter === 'favorites'
+                                        ? 'bg-amber-500 text-white'
+                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                <span>⭐ Favorites</span>
+                            </button>
+                            {categories.slice(0, 5).map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    type="button"
+                                    onClick={() => {
+                                        setQuickFilter('all');
+                                        selectCategory(cat.name);
+                                    }}
+                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                                        selectedCategory === cat.name
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     {/* Display Notes */}
                     <div className="p-4 max-w-7xl mx-auto">
                         <div className="mb-4 flex justify-between items-center flex-wrap gap-4">
@@ -792,10 +871,49 @@ function Notes() {
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                {currentView === 'recycled' && notes.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setEmptyConfirmOpen(true)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-800/50 transition cursor-pointer"
+                                    >
+                                        <TrashIcon className="w-3.5 h-3.5" />
+                                        <span>Empty Recycle Bin</span>
+                                    </button>
+                                )}
+
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {pagination.totalNotesCount} total notes
+                                    {pagination.totalNotesCount} {pagination.totalNotesCount === 1 ? 'note' : 'notes'}
                                 </p>
+
+                                {/* View Mode Toggle (Grid / List) */}
+                                <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-1.5 rounded-lg transition cursor-pointer ${
+                                            viewMode === 'grid'
+                                                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                                                : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                        }`}
+                                        title="Grid View"
+                                    >
+                                        <Squares2X2Icon className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-1.5 rounded-lg transition cursor-pointer ${
+                                            viewMode === 'list'
+                                                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                                                : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                        }`}
+                                        title="List View"
+                                    >
+                                        <Bars3Icon className="w-4 h-4" />
+                                    </button>
+                                </div>
 
                                 {/* Page Size Selector */}
                                 <div className="relative" ref={pageSizeDropdownRef}>
@@ -830,12 +948,24 @@ function Notes() {
                         </div>
 
                         <NotesGrid
-                            notes={notes}
+                            notes={notes.filter(note => {
+                                if (quickFilter === 'pinned') return note.isPinned;
+                                if (quickFilter === 'favorites') return note.isFavorite;
+                                return true;
+                            })}
                             loading={notesLoading}
                             onPageChange={handlePageChange}
                             pagination={pagination}
                             currentView={currentView}
+                            viewMode={viewMode}
                             onNoteClick={handleNoteClick}
+                            onTogglePin={handleTogglePin}
+                            onToggleFavorite={handleToggleFavorite}
+                            onCopyNote={handleCopyNote}
+                            onDeleteNote={(id) => handleDeleteNote({ id })}
+                            onRestoreNote={(id) => handleRestoreNote({ id })}
+                            onDeletePermanently={(id) => handleDeleteForever({ id })}
+                            onDownload={handleDownloadNote}
                         />
                     </div>
                 </>
@@ -863,6 +993,49 @@ function Notes() {
                 isSubmitting={isSubmitting}
                 currentView={currentView}
             />
+
+            {/* Empty Recycle Bin Modal */}
+            {emptyConfirmOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-fade-in">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl">
+                                <TrashIcon className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                    Empty Recycle Bin?
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    All notes and attachments will be permanently deleted
+                                </p>
+                            </div>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                            Are you sure you want to permanently delete all notes in the recycle bin? This action cannot be reversed.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setEmptyConfirmOpen(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setEmptyConfirmOpen(false);
+                                    handleDeleteRecycled();
+                                }}
+                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm shadow-red-500/20 active:scale-95"
+                            >
+                                Empty Bin
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <FloatingActionButton
                 isOpen={isFabOpen}

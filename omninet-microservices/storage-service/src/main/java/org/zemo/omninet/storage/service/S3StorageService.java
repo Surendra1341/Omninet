@@ -277,7 +277,7 @@ public class S3StorageService {
 
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key(s3Key).build());
-            fileMetadataRepository.deleteByUserIdAndS3Key(userId, s3Key);
+            fileMetadataRepository.deleteByS3Key(s3Key);
             fileEventProducer.publishFileEvent(userId, s3Key, 0L, FileEvent.Action.DELETED);
             return true;
         } catch (Exception e) {
@@ -356,10 +356,13 @@ public class S3StorageService {
                 int lastSlash = name.lastIndexOf('/');
                 if (lastSlash >= 0) name = name.substring(lastSlash + 1);
 
+                // Strip leading UUID prefix if present (e.g. 12345678-1234-1234-1234-123456789abc_filename.ext)
+                String displayName = name.replaceFirst("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}_", "");
+
                 long lastModified = obj.lastModified() != null ? obj.lastModified().toEpochMilli() : 0L;
 
                 items.add(FileInfoResponse.builder()
-                        .name(name)
+                        .name(displayName)
                         .fullPath(obj.key())
                         .sizeBytes(obj.size())
                         .lastModifiedEpochMs(lastModified)

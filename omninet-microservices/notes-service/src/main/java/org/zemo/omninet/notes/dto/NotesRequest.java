@@ -32,6 +32,9 @@ public class NotesRequest {
     @Builder.Default
     private Boolean isFavorite = false;
 
+    @Builder.Default
+    private Boolean removeAttachment = false;
+
     @JsonProperty("category")
     public void setCategory(Object categoryObj) {
         if (categoryObj instanceof Map<?, ?> map) {

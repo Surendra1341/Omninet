@@ -23,6 +23,7 @@ import org.zemo.omninet.proto.storage.UploadFileResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -92,7 +93,16 @@ public class NotesService {
             note.setIsFavorite(request.getIsFavorite());
         }
 
-        if (file != null && !file.isEmpty()) {
+        if (Boolean.TRUE.equals(request.getRemoveAttachment())) {
+            if (note.getFileDetails() != null) {
+                try {
+                    storageGrpcClient.deleteAttachment(userEmail, note.getFileDetails().getUploadFileName());
+                } catch (Exception e) {
+                    log.warn("Could not delete attachment on removal: {}", e.getMessage());
+                }
+                note.setFileDetails(null);
+            }
+        } else if (file != null && !file.isEmpty()) {
             // Delete old file if existed
             if (note.getFileDetails() != null) {
                 try {
@@ -200,6 +210,16 @@ public class NotesService {
 
     @Transactional
     public void emptyRecycleBin(String userId, String userEmail) {
+        List<Notes> deletedNotes = notesRepository.findByCreatedByAndIsDeletedTrue(userId);
+        for (Notes n : deletedNotes) {
+            if (n.getFileDetails() != null) {
+                try {
+                    storageGrpcClient.deleteAttachment(userEmail, n.getFileDetails().getUploadFileName());
+                } catch (Exception e) {
+                    log.warn("Failed to delete attachment for note {}: {}", n.getId(), e.getMessage());
+                }
+            }
+        }
         notesRepository.emptyRecycleBin(userId);
         log.info("Emptied recycle bin for user {}", userId);
     }

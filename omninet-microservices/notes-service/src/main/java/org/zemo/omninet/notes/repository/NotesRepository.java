@@ -16,6 +16,7 @@ import java.util.Optional;
 public interface NotesRepository extends JpaRepository<Notes, Integer> {
     Page<Notes> findByCreatedByAndIsDeletedFalse(String createdBy, Pageable pageable);
     Page<Notes> findByCreatedByAndIsDeletedTrue(String createdBy, Pageable pageable);
+    List<Notes> findByCreatedByAndIsDeletedTrue(String createdBy);
     Page<Notes> findByCreatedByAndCategoryIdAndIsDeletedFalse(String createdBy, Integer categoryId, Pageable pageable);
     Optional<Notes> findByIdAndCreatedBy(Integer id, String createdBy);
     Optional<Notes> findByFileDetailsIdAndCreatedBy(Integer fileDetailsId, String createdBy);

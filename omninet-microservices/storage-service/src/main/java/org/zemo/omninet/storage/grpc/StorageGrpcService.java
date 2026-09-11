@@ -69,11 +69,23 @@ public class StorageGrpcService extends StorageServiceGrpc.StorageServiceImplBas
     public void uploadFile(UploadFileRequest request, StreamObserver<UploadFileResponse> responseObserver) {
         try {
             byte[] bytes = request.getContent().toByteArray();
+            String fullPath = request.getFilePath();
+            String userEmail = "system";
+            if (fullPath.startsWith("users/")) {
+                String[] parts = fullPath.split("/");
+                if (parts.length > 1) {
+                    userEmail = parts[1];
+                }
+            }
+
+            String rawName = fullPath.contains("/") ? fullPath.substring(fullPath.lastIndexOf('/') + 1) : fullPath;
+            String cleanName = rawName.replaceFirst("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}_", "");
+
             FileMetadata meta = storageService.uploadFileDirect(
                     "grpc-system",
-                    "system",
+                    userEmail,
                     request.getFilePath(),
-                    null,
+                    cleanName,
                     request.getContentType(),
                     bytes
             );

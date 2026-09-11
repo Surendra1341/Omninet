@@ -326,14 +326,15 @@ export const notesAPI = {
       title: data.title,
       description: data.description,
       category: {
-        id: data.category.id,
-        name: data.category.name
-      }
+        id: data.category?.id,
+        name: data.category?.name
+      },
+      removeAttachment: !!data.removeAttachment
     };
     
     formData.append('notes', JSON.stringify(notesData));
     
-    if (data.file!== undefined) {
+    if (data.file !== undefined && data.file !== null) {
       console.log("File present " , data.file);
       formData.append('file', data.file);
     }

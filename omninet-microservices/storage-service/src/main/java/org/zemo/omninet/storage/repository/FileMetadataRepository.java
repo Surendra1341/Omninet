@@ -16,6 +16,7 @@ public interface FileMetadataRepository extends JpaRepository<FileMetadata, Stri
     Optional<FileMetadata> findByIdAndUserId(String id, String userId);
     void deleteByIdAndUserId(String id, String userId);
     void deleteByUserIdAndS3Key(String userId, String s3Key);
+    void deleteByS3Key(String s3Key);
 
     @Query("SELECT COALESCE(SUM(f.sizeBytes), 0) FROM FileMetadata f WHERE f.userId = :userId AND f.isFolder = false")
     Long sumSizeBytesByUserId(String userId);
