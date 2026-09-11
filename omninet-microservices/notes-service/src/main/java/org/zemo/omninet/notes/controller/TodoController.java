@@ -88,6 +88,26 @@ public class TodoController {
         return ResponseEntity.ok(ApiResponse.success(pagedTodos, "Paged todos retrieved"));
     }
 
+    @GetMapping("/analytics")
+    public ResponseEntity<ApiResponse<org.zemo.omninet.notes.dto.TodoAnalyticsDto>> getAnalytics(
+            HttpServletRequest request) {
+
+        String userId = GatewayHeaders.getUserId(request);
+        org.zemo.omninet.notes.dto.TodoAnalyticsDto analytics = todoService.getAnalytics(userId);
+        return ResponseEntity.ok(ApiResponse.success(analytics, "Todo analytics retrieved"));
+    }
+
+    @PatchMapping("/{id}/subtask/{subtaskId}")
+    public ResponseEntity<ApiResponse<TodoDto>> toggleSubtask(
+            @PathVariable Integer id,
+            @PathVariable Integer subtaskId,
+            HttpServletRequest request) {
+
+        String userId = GatewayHeaders.getUserId(request);
+        TodoDto updated = todoService.toggleSubtask(id, subtaskId, userId);
+        return ResponseEntity.ok(ApiResponse.success(updated, "Subtask status updated"));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<TodoDto>> getTodoById(
             @PathVariable Integer id,

@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { chatAPI } from '../services/api';
 import { tokenManager } from '../utils/tokenManager';
-import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { API_BASE_URL } from '../services/api';
 
@@ -43,6 +42,7 @@ export const useChatStore = create((set, get) => ({
         throw new Error('No authentication token available');
       }
 
+      const SockJS = (await import('sockjs-client')).default;
       const socket = new SockJS(`${API_BASE_URL}/ws`);
       const client = new Client({
         webSocketFactory: () => socket,

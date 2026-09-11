@@ -352,8 +352,9 @@ export const notesAPI = {
 // Todo API
 
 export const todoAPI = {
-  getTodos: async () => {
-    const response = await api.get('/api/v1/todo/');
+  getTodos: async (status) => {
+    const url = status ? `/api/v1/todo/?status=${status}` : '/api/v1/todo/';
+    const response = await api.get(url);
     return response.data;
   },
 
@@ -363,7 +364,22 @@ export const todoAPI = {
   },
 
   updateTodo: async (data) => {
-    const response = await api.post(`/api/v1/todo/`, data);
+    const response = await api.put(`/api/v1/todo/${data.id}`, data);
+    return response.data;
+  },
+
+  updateStatus: async (id, status) => {
+    const response = await api.patch(`/api/v1/todo/${id}/status?status=${status}`);
+    return response.data;
+  },
+
+  toggleSubtask: async (todoId, subtaskId) => {
+    const response = await api.patch(`/api/v1/todo/${todoId}/subtask/${subtaskId}`);
+    return response.data;
+  },
+
+  getAnalytics: async () => {
+    const response = await api.get('/api/v1/todo/analytics');
     return response.data;
   },
 

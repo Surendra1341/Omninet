@@ -18,4 +18,7 @@ public interface TodoRepository extends JpaRepository<Todo, Integer> {
     List<Todo> findByCreatedByAndStatus(String createdBy, TodoStatus status);
     Optional<Todo> findByIdAndCreatedBy(Integer id, String createdBy);
     List<Todo> findByReminderAtBeforeAndReminderSentFalse(LocalDateTime dateTime);
+    List<Todo> findByCreatedByAndDueDateBetween(String createdBy, LocalDateTime start, LocalDateTime end);
+    long countByCreatedByAndStatus(String createdBy, TodoStatus status);
+    long countByCreatedBy(String createdBy);
 }
