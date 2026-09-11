@@ -1,16 +1,20 @@
 package org.zemo.omninet.notes.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NotesRequest {
 
     private Integer id;
@@ -20,7 +24,6 @@ public class NotesRequest {
 
     private String description;
 
-    @NotNull(message = "Category ID is required")
     private Integer categoryId;
 
     @Builder.Default
@@ -28,4 +31,20 @@ public class NotesRequest {
 
     @Builder.Default
     private Boolean isFavorite = false;
+
+    @JsonProperty("category")
+    public void setCategory(Object categoryObj) {
+        if (categoryObj instanceof Map<?, ?> map) {
+            Object idVal = map.get("id");
+            if (idVal instanceof Number n) {
+                this.categoryId = n.intValue();
+            } else if (idVal instanceof String s) {
+                try {
+                    this.categoryId = Integer.parseInt(s);
+                } catch (NumberFormatException ignored) {}
+            }
+        } else if (categoryObj instanceof Number n) {
+            this.categoryId = n.intValue();
+        }
+    }
 }

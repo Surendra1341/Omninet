@@ -18,6 +18,7 @@ public interface NotesRepository extends JpaRepository<Notes, Integer> {
     Page<Notes> findByCreatedByAndIsDeletedTrue(String createdBy, Pageable pageable);
     Page<Notes> findByCreatedByAndCategoryIdAndIsDeletedFalse(String createdBy, Integer categoryId, Pageable pageable);
     Optional<Notes> findByIdAndCreatedBy(Integer id, String createdBy);
+    Optional<Notes> findByFileDetailsIdAndCreatedBy(Integer fileDetailsId, String createdBy);
 
     @Query("SELECT n FROM Notes n WHERE n.createdBy = :createdBy AND n.isDeleted = false AND " +
            "(LOWER(n.title) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(n.description) LIKE LOWER(CONCAT('%', :query, '%')))")

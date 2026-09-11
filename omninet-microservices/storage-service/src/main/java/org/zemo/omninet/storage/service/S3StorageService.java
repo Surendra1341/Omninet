@@ -443,7 +443,12 @@ public class S3StorageService {
         if (lower.endsWith(".txt") || lower.endsWith(".log")) return "text/plain";
         if (lower.endsWith(".html") || lower.endsWith(".htm")) return "text/html";
         if (lower.endsWith(".json")) return "application/json";
+        if (lower.endsWith(".xml")) return "application/xml";
         if (lower.endsWith(".csv")) return "text/csv";
+        if (lower.endsWith(".java") || lower.endsWith(".js") || lower.endsWith(".jsx")
+                || lower.endsWith(".ts") || lower.endsWith(".tsx") || lower.endsWith(".py")
+                || lower.endsWith(".c") || lower.endsWith(".cpp") || lower.endsWith(".md")
+                || lower.endsWith(".sh") || lower.endsWith(".sql")) return "text/plain";
         if (lower.endsWith(".mp3")) return "audio/mpeg";
         if (lower.endsWith(".wav")) return "audio/wav";
         if (lower.endsWith(".mp4")) return "video/mp4";

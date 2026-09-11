@@ -331,3 +331,58 @@ The React frontend builds cleanly and connects to the Reactive Gateway at `http:
 - `http://localhost:8082/api/v1/storage/files/download-url?fileName=206810867.png` returns HTTP 200 with MinIO status 200 (`image/png`, 50,438 bytes).
 - `http://localhost:8082/api/v1/storage/files/download-url?fileName=Gmail_-_Internship_Confirmation_Java_Backend_Developer_Intern.pdf` returns HTTP 200 with MinIO status 200 (`application/pdf`, 45,992 bytes, valid `%PDF-1.4`).
 - Frontend production bundle `npm run build` compiled cleanly in 5.54s.
+
+---
+
+## 7. Notes Service Multipart Request Fix
+
+### Root Cause
+Frontend sends note creation/editing as `multipart/form-data` with `notes` (JSON string) and optional `file` attachment.
+In `NotesController.java`, the endpoint had both `@PostMapping(consumes = {MULTIPART_FORM_DATA_VALUE, APPLICATION_JSON_VALUE})` and `@RequestBody(required = false) NotesRequest jsonRequest`.
+In Spring MVC, `RequestResponseBodyMethodProcessor` evaluates `@RequestBody` on the incoming `Content-Type: multipart/form-data`. Because no standard `HttpMessageConverter` supports converting multipart requests into Java objects, Spring threw:
+```
+org.springframework.web.HttpMediaTypeNotSupportedException: Content-Type 'multipart/form-data;boundary=...;charset=UTF-8' is not supported
+```
+which was caught by `GlobalExceptionHandler` and returned as a 500 Internal Server Error.
+
+### Changes Applied
+1. **`NotesController.java`**:
+   - Split `createNote` and `updateNote` into dedicated `@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)` and `@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)` handlers.
+   - Multipart endpoints read the `notes` parameter / part and parse it into `NotesRequest` via Jackson `objectMapper`.
+2. **`NotesRequest.java`**:
+   - Added `@JsonProperty("category")` setter supporting both `{ id, name }` category objects and primitive numbers, and added `@JsonIgnoreProperties(ignoreUnknown = true)`.
+3. **`CategoryService.java`**:
+   - Added a safe fallback for null `categoryId` that defaults to the user's active/default category.
+
+### Verification
+- `POST http://localhost:8083/api/v1/notes` with multipart form data returned HTTP 200:
+  `{"success": true, "message": "Note created successfully", "data": { ... }}`
+- Multipart note with file attachment verified successfully uploading via gRPC to MinIO and saving `FileDetails`.
+
+---
+
+## 8. Notes DTO & Frontend Category Compatibility Fix
+
+### Root Cause
+`NotesGrid.jsx` line 45 attempted to read `{note.category.name}`.
+`NotesDto.java` in `notes-service` only provided flat fields (`categoryId`, `categoryName`, `categoryColor`), leaving `note.category` as `undefined` on the frontend and causing a runtime `TypeError: Cannot read properties of undefined (reading 'name')`.
+
+### Changes Applied
+1. **`NotesDto.java`**:
+   - Added `category` field (`CategoryDto`) populated from `entity.getCategory()`.
+   - Added `@JsonProperty("createdDate")` getter alias mapped to `createdOn`.
+2. **Frontend Safeguards**:
+   - `NotesGrid.jsx`: Updated to `{note.category?.name || note.categoryName || 'General'}` and `formatDate(note.createdDate || note.createdOn)`.
+   - `NoteDetailModal.jsx`, `Notes.jsx`, `Category.jsx`: Replaced direct category property access with safe optional chaining.
+
+### Verification
+- API response for notes now returns nested category object:
+  ```json
+  {
+    "id": 3,
+    "title": "Java",
+    "category": { "id": 5, "name": "Java", "colorHex": "#6366f1" },
+    "createdDate": "2026-09-11T14:05:47.778011"
+  }
+  ```
+- `npm run build` completed cleanly in 6.19s with 0 errors.

@@ -1,13 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { categoryAPI, notesAPI } from '../../services/api';
 import AddNoteModal from '../../components/Notes/AddNoteModal';
 import NoteDetailModal from '../../components/Notes/NoteDetailModal';
 import CategoryDropdown from '../../components/Notes/CategoryDropdown';
 import FloatingActionButton from '../../components/Notes/FloatingActionButton';
 import NotesGrid from '../../components/Notes/NotesGrid';
+import Category from '../Category/Category';
+import storageClient from '../../services/storageClient';
 import toast, { Toaster } from 'react-hot-toast';
+import { DocumentTextIcon, TagIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 function Notes() {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [categories, setCategories] = useState([]);
     const [notes, setNotes] = useState([]);
     const [pagination, setPagination] = useState({
@@ -63,8 +68,7 @@ function Notes() {
             
             if (response.status === 'success') {
                 // Handle different possible data structures
-                let recycledNotes = response.data;
-                
+                let recycledNotes = Array.isArray(response.data) ? response.data : (response.data?.notes || []);
 
                 // Calculate pagination for recycled notes
                 const totalNotesCount = recycledNotes.length;
@@ -277,9 +281,28 @@ function Notes() {
         }
     };
 
+    const handleRestoreNote = async (note) => {
+        try {
+            await notesAPI.restoreNote(note.id);
+            handleRecycleBin();
+            handleCloseNoteDetail();
+            toast.success('Note restored successfully!', {
+                duration: 3000,
+                position: 'top-right',
+            });
+        } catch (error) {
+            console.error('Error restoring note:', error);
+            toast.error('Failed to restore note. Please try again.', {
+                duration: 4000,
+                position: 'top-right',
+            });
+        }
+    };
+
     const handleDownloadNote = async (note) => {
         try {
-            const response = await notesAPI.downloadNote(note.fileDetails.id);
+            const id = note.fileDetails?.id || note.id;
+            const response = await notesAPI.downloadNote(id);
             
             const contentType = response.headers?.['content-type'] || 'application/octet-stream';
             
@@ -332,6 +355,21 @@ function Notes() {
             });
         } catch (error) {
             console.error('Error downloading note:', error);
+            // Fallback directly to storageClient
+            if (note?.fileDetails?.path) {
+                try {
+                    const fallbackRes = await storageClient.downloadFile(note.fileDetails.path);
+                    if (fallbackRes?.success) {
+                        toast.success('File downloaded successfully!', {
+                            duration: 3000,
+                            position: 'top-right',
+                        });
+                        return;
+                    }
+                } catch (fallbackErr) {
+                    console.error('Fallback download error:', fallbackErr);
+                }
+            }
             toast.error('Failed to download note. Please try again.', {
                 duration: 4000,
                 position: 'top-right',
@@ -448,6 +486,18 @@ function Notes() {
         };
     }, []);
 
+    // Sync active tab with searchParams
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab === 'categories') {
+            setCurrentView('categories');
+        } else if (tab === 'recycled') {
+            handleRecycleBin();
+        } else if (tab === 'notes') {
+            setCurrentView('notes');
+        }
+    }, [searchParams]);
+
     const fetchCategories = async () => {
         try {
             setLoading(true);
@@ -478,7 +528,7 @@ function Notes() {
                 if (categoryName === 'All categories') {
                     filteredNotes = allNotes;
                 } else {
-                    filteredNotes = allNotes.filter(note => note.category.name === categoryName);
+                    filteredNotes = allNotes.filter(note => (note.category?.name || note.categoryName) === categoryName);
                 }
 
                 // Calculate pagination for filtered notes
@@ -523,7 +573,7 @@ function Notes() {
             const response = await notesAPI.getRecycledNotes();
             
             if (response.status === 'success') {
-                let recycledNotes = response.data;
+                let recycledNotes = Array.isArray(response.data) ? response.data : (response.data?.notes || []);
                 
                 const totalNotesCount = recycledNotes.length;
                 const totalPagesCount = Math.ceil(totalNotesCount / pagination.pageSize);
@@ -614,113 +664,182 @@ function Notes() {
                 }}
             />
             
-            <form className="p-3 mx-auto" onSubmit={handleSearch}>
-                <div className="flex flex-row justify-center">
-                    <CategoryDropdown
-                        categories={categories}
-                        loading={loading}
-                        selectedCategory={selectedCategory}
-                        onCategorySelect={selectCategory}
-                        isOpen={isDropdownOpen}
-                        onToggle={() => {
-                            toggleDropdown();
-                            if (isSearching) {
-                                handleClearSearch();
-                            } else {
+            {/* Top Sub-Navigation Tabs for Notes Section */}
+            <div className="max-w-7xl mx-auto px-4 pt-4 pb-2">
+                <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3 flex-wrap gap-3">
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            {currentView === 'categories' ? 'Note Categories' : currentView === 'recycled' ? 'Recycle Bin' : 'Notes'}
+                        </h1>
+                    </div>
+                    <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <button
+                            type="button"
+                            onClick={() => {
                                 setCurrentView('notes');
-                            }
-                        }}
-                    />
-                    <div className="relative w-100">
-                        <input 
-                            type="search" 
-                            id="search-dropdown" 
-                            className="block py-2.5 pl-8 md:pl-4 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500" 
-                            placeholder="Search Notes.." 
-                            value={searchQuery}
-                            onChange={handleSearchInputChange}
-                        />
-                        {isSearching && searchQuery && (
-                            <button
-                                type="button"
-                                onClick={handleClearSearch}
-                                className="absolute top-1/2 right-12 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        )}
-                        <button type="submit" className="absolute top-0 end-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-600 focus:ring-4 focus:outline-none  dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                            </svg>
-                            <span className="sr-only">Search</span>
+                                setSearchParams({});
+                                fetchCategories();
+                                fetchAndFilterNotes(selectedCategory, 0, pagination.pageSize);
+                            }}
+                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                currentView === 'notes' || currentView === 'search'
+                                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                            }`}
+                        >
+                            <DocumentTextIcon className="w-4 h-4" />
+                            <span>All Notes</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setCurrentView('categories');
+                                setSearchParams({ tab: 'categories' });
+                            }}
+                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                currentView === 'categories'
+                                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                            }`}
+                        >
+                            <TagIcon className="w-4 h-4" />
+                            <span>Categories</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                handleRecycleBin();
+                                setSearchParams({ tab: 'recycled' });
+                            }}
+                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                currentView === 'recycled'
+                                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                            }`}
+                        >
+                            <TrashIcon className="w-4 h-4" />
+                            <span>Recycle Bin</span>
                         </button>
                     </div>
                 </div>
-            </form>
+            </div>
 
-
-            {/* Display Notes */}
-            <div className="p-4 max-w-7xl mx-auto">
-                <div className="mb-4 flex justify-between items-center flex-wrap gap-4">
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                            {isSearching ? 'Search Results' : currentView === 'recycled' ? 'Recycled Notes' : 'Notes'}
-                        </h2>
-                        {isSearching && (
-                            <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                for "{searchQuery}"
-                            </span>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {pagination.totalNotesCount} total notes
-                        </p>
-
-                        {/* Page Size Selector */}
-                        <div className="relative" ref={pageSizeDropdownRef}>
-                            <button
-                                onClick={togglePageSizeDropdown}
-                                className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                            >
-                                <span className="mr-2">Show:</span>
-                                <span className="font-semibold">{pagination.pageSize}</span>
-                                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-
-                            <div className={`absolute right-0 top-full mt-1 z-100 ${isPageSizeDropdownOpen ? 'block' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-24 dark:bg-gray-700`}>
-                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-                                    {[5, 10, 15, 20, 25, 50].map((size) => (
-                                        <li key={size}>
-                                            <button
-                                                onClick={() => handlePageSizeChange(size)}
-                                                className={`block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ${pagination.pageSize === size ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200' : ''
-                                                    }`}
-                                            >
-                                                {size}
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
+            {currentView === 'categories' ? (
+                <div className="max-w-7xl mx-auto px-4 py-2">
+                    <Category />
+                </div>
+            ) : (
+                <>
+                    <form className="p-3 mx-auto" onSubmit={handleSearch}>
+                        <div className="flex flex-row justify-center">
+                            <CategoryDropdown
+                                categories={categories}
+                                loading={loading}
+                                selectedCategory={selectedCategory}
+                                onCategorySelect={selectCategory}
+                                isOpen={isDropdownOpen}
+                                onToggle={() => {
+                                    toggleDropdown();
+                                    if (isSearching) {
+                                        handleClearSearch();
+                                    } else {
+                                        setCurrentView('notes');
+                                    }
+                                }}
+                            />
+                            <div className="relative w-100">
+                                <input 
+                                    type="search" 
+                                    id="search-dropdown" 
+                                    className="block py-2.5 pl-8 md:pl-4 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500" 
+                                    placeholder="Search Notes.." 
+                                    value={searchQuery}
+                                    onChange={handleSearchInputChange}
+                                />
+                                {isSearching && searchQuery && (
+                                    <button
+                                        type="button"
+                                        onClick={handleClearSearch}
+                                        className="absolute top-1/2 right-12 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                )}
+                                <button type="submit" className="absolute top-0 end-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-600 focus:ring-4 focus:outline-none  dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                    <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                                    </svg>
+                                    <span className="sr-only">Search</span>
+                                </button>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </form>
 
-                <NotesGrid
-                    notes={notes}
-                    loading={notesLoading}
-                    onPageChange={handlePageChange}
-                    pagination={pagination}
-                    currentView={currentView}
-                    onNoteClick={handleNoteClick}
-                />
-            </div>
+                    {/* Display Notes */}
+                    <div className="p-4 max-w-7xl mx-auto">
+                        <div className="mb-4 flex justify-between items-center flex-wrap gap-4">
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                                    {isSearching ? 'Search Results' : currentView === 'recycled' ? 'Recycled Notes' : 'Notes'}
+                                </h2>
+                                {isSearching && (
+                                    <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                                        for "{searchQuery}"
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    {pagination.totalNotesCount} total notes
+                                </p>
+
+                                {/* Page Size Selector */}
+                                <div className="relative" ref={pageSizeDropdownRef}>
+                                    <button
+                                        onClick={togglePageSizeDropdown}
+                                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                    >
+                                        <span className="mr-2">Show:</span>
+                                        <span className="font-semibold">{pagination.pageSize}</span>
+                                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    <div className={`absolute right-0 top-full mt-1 z-100 ${isPageSizeDropdownOpen ? 'block' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-24 dark:bg-gray-700`}>
+                                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                            {[5, 10, 15, 20, 25, 50].map((size) => (
+                                                <li key={size}>
+                                                    <button
+                                                        onClick={() => handlePageSizeChange(size)}
+                                                        className={`block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ${pagination.pageSize === size ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200' : ''
+                                                            }`}
+                                                    >
+                                                        {size}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <NotesGrid
+                            notes={notes}
+                            loading={notesLoading}
+                            onPageChange={handlePageChange}
+                            pagination={pagination}
+                            currentView={currentView}
+                            onNoteClick={handleNoteClick}
+                        />
+                    </div>
+                </>
+            )}
 
             <AddNoteModal
                 isOpen={isAddNoteModalOpen}
@@ -739,6 +858,7 @@ function Notes() {
                 onDelete={handleDeleteNote}
                 onCopy={handleCopyNote}
                 onDeletePermanently={handleDeleteForever}
+                onRestore={handleRestoreNote}
                 onDownload={handleDownloadNote}
                 isSubmitting={isSubmitting}
                 currentView={currentView}

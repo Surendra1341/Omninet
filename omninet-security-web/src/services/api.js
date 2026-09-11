@@ -278,6 +278,21 @@ export const notesAPI = {
     return response.data;
   },
 
+  restoreNote: async (id) => {
+    const response = await api.post(`/api/v1/notes/${id}/restore`);
+    return response.data;
+  },
+
+  togglePin: async (id) => {
+    const response = await api.post(`/api/v1/notes/${id}/pin`);
+    return response.data;
+  },
+
+  toggleFavorite: async (id) => {
+    const response = await api.post(`/api/v1/notes/${id}/favorite`);
+    return response.data;
+  },
+
   createNote: async (data) => {
     const formData = new FormData();
     const notesData = {

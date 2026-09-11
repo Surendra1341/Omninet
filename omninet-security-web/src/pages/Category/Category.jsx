@@ -161,8 +161,7 @@ function Category() {
       const notesResponse = await notesAPI.getNotes(0, 1000); // Fetch a large number to get all notes
       
       if (notesResponse.status === 'success') {
-        const allNotes = notesResponse.data.notes;
-        const notesToDelete = allNotes.filter(note => note.category.id === id);
+        const notesToDelete = allNotes.filter(note => ((note.category && note.category.id === id) || note.categoryId === id));
         
         // Delete each note that belongs to this category
         for (const note of notesToDelete) {

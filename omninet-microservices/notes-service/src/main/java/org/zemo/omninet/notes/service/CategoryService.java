@@ -90,6 +90,18 @@ public class CategoryService {
     }
 
     public Category getCategoryEntity(Integer id, String userId) {
+        if (id == null) {
+            List<Category> userCategories = categoryRepository.findByCreatedByAndIsActiveTrueAndIsDeletedFalse(userId);
+            if (!userCategories.isEmpty()) {
+                return userCategories.get(0);
+            }
+            createDefaultCategoriesForUser(userId);
+            userCategories = categoryRepository.findByCreatedByAndIsActiveTrueAndIsDeletedFalse(userId);
+            if (!userCategories.isEmpty()) {
+                return userCategories.get(0);
+            }
+            throw new BusinessException("No category available. Please create a category first.");
+        }
         return categoryRepository.findByIdAndCreatedBy(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
     }

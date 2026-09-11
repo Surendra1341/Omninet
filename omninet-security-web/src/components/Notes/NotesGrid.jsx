@@ -42,7 +42,7 @@ function NotesGrid({ notes, loading, onPageChange, pagination, currentView, onNo
                                 {note.title}
                             </h3>
                             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
-                                {note.category.name}
+                                {note.category?.name || note.categoryName || 'General'}
                             </span>
                         </div>
 
@@ -52,7 +52,7 @@ function NotesGrid({ notes, loading, onPageChange, pagination, currentView, onNo
 
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                Created: {formatDate(note.createdDate)}
+                                Created: {formatDate(note.createdDate || note.createdOn)}
                             </p>
                         </div>
                     </div>

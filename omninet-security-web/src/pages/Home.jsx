@@ -79,7 +79,7 @@ const Home = () => {
           <Route path="/todo" element={<Todo />} />
           <Route path="/profile" element={<Profile user={user} />} />
           <Route path="/notes" element={<Notes />} />
-          <Route path="/category" element={<Category />} />
+          <Route path="/category" element={<Navigate to="/home/notes?tab=categories" replace />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/ai-chat" element={<AiChat />} />
           <Route

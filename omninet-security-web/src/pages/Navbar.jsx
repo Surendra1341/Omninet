@@ -11,7 +11,6 @@ const navigation = [
   { label: 'Files', to: '/home/storage', icon: FolderIcon },
   { label: 'Notes', to: '/home/notes', icon: RectangleStackIcon },
   { label: 'Tasks', to: '/home/todo', icon: CheckCircleIcon },
-  { label: 'Categories', to: '/home/category', icon: TagIcon },
   { label: 'Chat', to: '/home/chat', icon: ChatBubbleLeftRightIcon },
   { label: 'Assistant', to: '/home/ai-chat', icon: SparklesIcon },
 ];

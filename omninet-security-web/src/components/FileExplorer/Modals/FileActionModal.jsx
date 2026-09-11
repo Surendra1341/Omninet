@@ -1,6 +1,10 @@
 import { ArrowDownTrayIcon, DocumentIcon, EyeIcon, PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-const previewableExtensions = new Set(['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'txt', 'json', 'xml', 'html', 'htm']);
+const previewableExtensions = new Set([
+  'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg',
+  'txt', 'json', 'xml', 'html', 'htm', 'md', 'log',
+  'java', 'js', 'jsx', 'ts', 'tsx', 'py', 'c', 'cpp', 'h', 'hpp', 'sh', 'sql', 'css', 'yml', 'yaml'
+]);
 
 export const canPreviewFile = (fileName = '') => previewableExtensions.has(fileName.split('.').pop()?.toLowerCase());
 

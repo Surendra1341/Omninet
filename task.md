@@ -103,3 +103,15 @@
 - [x] Frontend `FileExplorer.jsx`: Preserved folder prefixes (`item.path`) on click, double-click, and download/preview actions
 - [x] End-to-end verified with real MinIO storage: PNG and PDF preview/download verified returning HTTP 200 with valid binary streams
 
+## Phase 10: Notes Creation Multipart Handling Fix
+- [x] `NotesController.java`: Split `createNote` and `updateNote` into dedicated `@PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)` and JSON endpoints, removing `@RequestBody` from the multipart path which caused Spring's `HttpMediaTypeNotSupportedException` (500 error).
+- [x] `NotesRequest.java`: Added `@JsonProperty("category")` setter to automatically parse both nested `{ id, name }` category objects and direct `categoryId` numbers, with `@JsonIgnoreProperties(ignoreUnknown = true)`.
+- [x] `CategoryService.java`: Gracefully handle null `categoryId` by falling back to the user's active/default category.
+- [x] Verified via curl with multipart form-data (both with and without file attachment) returning HTTP 200.
+
+## Phase 11: Notes DTO & Frontend Category Compatibility Fix
+- [x] `NotesDto.java`: Added `category` object (`CategoryDto`) and `createdDate` getter alias so note responses contain `{ id, name, colorHex }` matching the frontend contract.
+- [x] `NotesGrid.jsx`: Added optional chaining (`note.category?.name || note.categoryName || 'General'`) and date fallback (`note.createdDate || note.createdOn`) fixing `TypeError: Cannot read properties of undefined (reading 'name')`.
+- [x] `NoteDetailModal.jsx`, `Notes.jsx`, `Category.jsx`: Updated category references with safe accessors.
+- [x] Verified note list API returns nested `category` object and frontend builds cleanly with 0 errors.
+

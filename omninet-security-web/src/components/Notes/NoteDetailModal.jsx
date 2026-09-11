@@ -4,8 +4,14 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DownloadIcon from '@mui/icons-material/Download';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 import ToolTip from './ToolTip';
 import CloseIcon from '@mui/icons-material/Close';
+import { DocumentIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
+import FileActionModal, { canPreviewFile } from '../FileExplorer/Modals/FileActionModal';
+import storageClient from '../../services/storageClient';
+import toast from 'react-hot-toast';
 
 function NoteDetailModal({ 
     isOpen, 
@@ -16,6 +22,7 @@ function NoteDetailModal({
     onDelete,
     onCopy,
     onDeletePermanently,
+    onRestore,
     onDownload,
     isSubmitting ,
     currentView
@@ -32,6 +39,8 @@ function NoteDetailModal({
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
     const categoryDropdownRef = useRef(null);
     const fileInputRef = useRef(null);
+    const [fileActionItem, setFileActionItem] = useState(null);
+    const [isFileActionWorking, setIsFileActionWorking] = useState(false);
 
     useEffect(() => {
         if (note) {
@@ -126,10 +135,52 @@ function NoteDetailModal({
         setIsEditing(false);
     };
 
+    const handlePreviewAttachment = async (fileDetails = note?.fileDetails) => {
+        if (!fileDetails) return;
+        setIsFileActionWorking(true);
+        try {
+            const filePath = fileDetails.path || fileDetails.displayFileName;
+            const res = await storageClient.previewFile(filePath);
+            if (!res?.success) {
+                toast.error(res?.error || 'Unable to preview file');
+            } else {
+                setFileActionItem(null);
+            }
+        } catch (err) {
+            console.error('Preview error:', err);
+            toast.error('Preview failed');
+        } finally {
+            setIsFileActionWorking(false);
+        }
+    };
+
+    const handleDownloadAttachment = async (fileDetails = note?.fileDetails) => {
+        if (!fileDetails) return;
+        setIsFileActionWorking(true);
+        try {
+            if (onDownload) {
+                await onDownload(note);
+            } else if (fileDetails.path) {
+                const res = await storageClient.downloadFile(fileDetails.path);
+                if (!res?.success) {
+                    toast.error(res?.error || 'Download failed');
+                }
+            }
+            setFileActionItem(null);
+        } catch (err) {
+            console.error('Download error:', err);
+            toast.error('Download failed');
+        } finally {
+            setIsFileActionWorking(false);
+        }
+    };
+
+
     const handleClose = () => {
         setIsEditing(false);
         setFilePreview(null);
         setIsCategoryDropdownOpen(false);
+        setFileActionItem(null);
         onClose();
     };
 
@@ -182,17 +233,30 @@ function NoteDetailModal({
                                             </>
                                         )}
 
+                                        {/* Preview Attachment Button */}
+                                        {note.fileDetails !== null && canPreviewFile(note.fileDetails.displayFileName) && (
+                                            <ToolTip title="Preview Attachment" event={() => handlePreviewAttachment(note.fileDetails)}>
+                                                <VisibilityIcon />
+                                            </ToolTip>
+                                        )}
+
                                         {/* Download Button */}
                                         {note.fileDetails !== null && (
-                                            <ToolTip title="Download" event={() => onDownload(note)}>
+                                            <ToolTip title="Download" event={() => onDownload ? onDownload(note) : handleDownloadAttachment(note.fileDetails)}>
                                                 <DownloadIcon />
                                             </ToolTip>
-                                            
                                         )}
 
 
                                         {currentView === 'recycled' && (
                                             <>
+                                                {/* Restore Button */}
+                                                {onRestore && (
+                                                    <ToolTip title="Restore Note" event={() => onRestore(note)}>
+                                                        <RestoreFromTrashIcon />
+                                                    </ToolTip>
+                                                )}
+
                                                 {/* Permanent Delete Button */}
                                                 <ToolTip title="Delete Permanently" event={() => onDeletePermanently(note)}>
                                                     <DeleteForeverIcon />
@@ -376,7 +440,7 @@ function NoteDetailModal({
                                 <div>
                                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{note.title}</h3>
                                     <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-blue-900 dark:text-blue-300">
-                                        {note.category.name}
+                                        {note.category?.name || note.categoryName || 'General'}
                                     </span>
                                 </div>
 
@@ -388,13 +452,55 @@ function NoteDetailModal({
                                 </div>
 
                                 {note.fileDetails !== null && (
-                                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">File Detail</h4>
-                                    <p onClick={() => onDownload(note)} className="w-fit hover:text-blue-700 cursor-pointer underline text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
-                                        {note.fileDetails.displayFileName}
-                                    </p>
-                                </div>
-                                    
+                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attachment</h4>
+                                        <div className="flex items-center justify-between p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+                                            <div 
+                                                className="flex items-center gap-3 cursor-pointer min-w-0 flex-1 group"
+                                                onClick={() => setFileActionItem({
+                                                    name: note.fileDetails.displayFileName,
+                                                    path: note.fileDetails.path,
+                                                    size: note.fileDetails.fileSize
+                                                })}
+                                            >
+                                                <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 group-hover:bg-blue-200 dark:group-hover:bg-blue-900 transition-colors">
+                                                    <DocumentIcon className="w-5 h-5" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                        {note.fileDetails.displayFileName}
+                                                    </p>
+                                                    {note.fileDetails.fileSize ? (
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {formatFileSize(note.fileDetails.fileSize)}
+                                                        </p>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                                                {canPreviewFile(note.fileDetails.displayFileName) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePreviewAttachment(note.fileDetails)}
+                                                        className="btn btn-ghost btn-xs sm:btn-sm text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 gap-1"
+                                                        title="Preview attachment"
+                                                    >
+                                                        <EyeIcon className="w-4 h-4" />
+                                                        <span className="hidden sm:inline">Preview</span>
+                                                    </button>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onDownload ? onDownload(note) : handleDownloadAttachment(note.fileDetails)}
+                                                    className="btn btn-ghost btn-xs sm:btn-sm text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 gap-1"
+                                                    title="Download attachment"
+                                                >
+                                                    <ArrowDownTrayIcon className="w-4 h-4" />
+                                                    <span className="hidden sm:inline">Download</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 )}
 
 
@@ -415,6 +521,14 @@ function NoteDetailModal({
                     </div>
                 )}
             </div>
+
+            <FileActionModal
+                item={fileActionItem}
+                isWorking={isFileActionWorking}
+                onClose={() => !isFileActionWorking && setFileActionItem(null)}
+                onPreview={() => handlePreviewAttachment(note?.fileDetails)}
+                onDownload={() => handleDownloadAttachment(note?.fileDetails)}
+            />
         </div>
     );
 }

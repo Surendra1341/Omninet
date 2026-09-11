@@ -130,6 +130,13 @@ public class NotesService {
         return NotesDto.fromEntity(note);
     }
 
+    public NotesDto getNoteByIdOrFileDetailsId(Integer id, String userId) {
+        Notes note = notesRepository.findByIdAndCreatedBy(id, userId)
+                .or(() -> notesRepository.findByFileDetailsIdAndCreatedBy(id, userId))
+                .orElseThrow(() -> new ResourceNotFoundException("Note or attachment not found with id: " + id));
+        return NotesDto.fromEntity(note);
+    }
+
     public NotesResponse searchNotes(String userId, String query, Pageable pageable) {
         Page<Notes> page = notesRepository.searchNotes(userId, query, pageable);
         return toNotesResponse(page);

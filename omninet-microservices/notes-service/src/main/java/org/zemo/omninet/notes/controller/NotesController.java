@@ -33,45 +33,85 @@ public class NotesController {
     private final StorageGrpcClient storageGrpcClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @PostMapping(value = {"", "/"}, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ApiResponse<NotesDto>> createNote(
-            @RequestPart(value = "note", required = false) String noteJson,
-            @RequestPart(value = "notes", required = false) String notesJson,
-            @RequestParam(value = "note", required = false) String noteParam,
+    @PostMapping(value = {"", "/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<NotesDto>> createNoteMultipart(
             @RequestParam(value = "notes", required = false) String notesParam,
-            @RequestBody(required = false) NotesRequest jsonRequest,
+            @RequestParam(value = "note", required = false) String noteParam,
+            @RequestPart(value = "notes", required = false) String notesPart,
+            @RequestPart(value = "note", required = false) String notePart,
             @RequestPart(value = "file", required = false) MultipartFile file,
             HttpServletRequest request) throws Exception {
 
         String userId = GatewayHeaders.getUserId(request);
         String userEmail = GatewayHeaders.getUserEmail(request);
 
-        String rawJson = noteJson != null ? noteJson : (notesJson != null ? notesJson : (noteParam != null ? noteParam : notesParam));
-        NotesRequest notesRequest = jsonRequest != null ? jsonRequest : objectMapper.readValue(rawJson, NotesRequest.class);
+        String rawJson = notesParam != null ? notesParam : (noteParam != null ? noteParam : (notesPart != null ? notesPart : notePart));
+        if (rawJson == null || rawJson.isBlank()) {
+            throw new org.zemo.omninet.common.exception.BusinessException("Note payload is required");
+        }
+        NotesRequest notesRequest = objectMapper.readValue(rawJson, NotesRequest.class);
+        if (notesRequest.getId() != null) {
+            NotesDto note = notesService.updateNote(notesRequest.getId(), notesRequest, file, userId, userEmail);
+            return ResponseEntity.ok(ApiResponse.success(note, "Note updated successfully"));
+        }
         NotesDto note = notesService.createNote(notesRequest, file, userId, userEmail);
 
         return ResponseEntity.ok(ApiResponse.success(note, "Note created successfully"));
     }
 
-    @PutMapping(value = {"/{id}", ""}, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ApiResponse<NotesDto>> updateNote(
+    @PostMapping(value = {"", "/"}, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse<NotesDto>> createNoteJson(
+            @RequestBody NotesRequest notesRequest,
+            HttpServletRequest request) throws Exception {
+
+        String userId = GatewayHeaders.getUserId(request);
+        String userEmail = GatewayHeaders.getUserEmail(request);
+
+        if (notesRequest.getId() != null) {
+            NotesDto note = notesService.updateNote(notesRequest.getId(), notesRequest, null, userId, userEmail);
+            return ResponseEntity.ok(ApiResponse.success(note, "Note updated successfully"));
+        }
+        NotesDto note = notesService.createNote(notesRequest, null, userId, userEmail);
+
+        return ResponseEntity.ok(ApiResponse.success(note, "Note created successfully"));
+    }
+
+    @PutMapping(value = {"/{id}", ""}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<NotesDto>> updateNoteMultipart(
             @PathVariable(required = false) Integer id,
-            @RequestPart(value = "note", required = false) String noteJson,
-            @RequestPart(value = "notes", required = false) String notesJson,
-            @RequestParam(value = "note", required = false) String noteParam,
             @RequestParam(value = "notes", required = false) String notesParam,
-            @RequestBody(required = false) NotesRequest jsonRequest,
+            @RequestParam(value = "note", required = false) String noteParam,
+            @RequestPart(value = "notes", required = false) String notesPart,
+            @RequestPart(value = "note", required = false) String notePart,
             @RequestPart(value = "file", required = false) MultipartFile file,
             HttpServletRequest request) throws Exception {
 
         String userId = GatewayHeaders.getUserId(request);
         String userEmail = GatewayHeaders.getUserEmail(request);
 
-        String rawJson = noteJson != null ? noteJson : (notesJson != null ? notesJson : (noteParam != null ? noteParam : notesParam));
-        NotesRequest notesRequest = jsonRequest != null ? jsonRequest : objectMapper.readValue(rawJson, NotesRequest.class);
+        String rawJson = notesParam != null ? notesParam : (noteParam != null ? noteParam : (notesPart != null ? notesPart : notePart));
+        if (rawJson == null || rawJson.isBlank()) {
+            throw new org.zemo.omninet.common.exception.BusinessException("Note payload is required");
+        }
+        NotesRequest notesRequest = objectMapper.readValue(rawJson, NotesRequest.class);
         Integer noteId = id != null ? id : (notesRequest.getId() != null ? notesRequest.getId() : null);
 
         NotesDto note = notesService.updateNote(noteId, notesRequest, file, userId, userEmail);
+
+        return ResponseEntity.ok(ApiResponse.success(note, "Note updated successfully"));
+    }
+
+    @PutMapping(value = {"/{id}", ""}, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse<NotesDto>> updateNoteJson(
+            @PathVariable(required = false) Integer id,
+            @RequestBody NotesRequest notesRequest,
+            HttpServletRequest request) throws Exception {
+
+        String userId = GatewayHeaders.getUserId(request);
+        String userEmail = GatewayHeaders.getUserEmail(request);
+
+        Integer noteId = id != null ? id : (notesRequest.getId() != null ? notesRequest.getId() : null);
+        NotesDto note = notesService.updateNote(noteId, notesRequest, null, userId, userEmail);
 
         return ResponseEntity.ok(ApiResponse.success(note, "Note updated successfully"));
     }
@@ -162,7 +202,7 @@ public class NotesController {
         return ResponseEntity.ok(ApiResponse.success(null, "Note moved to recycle bin"));
     }
 
-    @PostMapping("/{id}/restore")
+    @RequestMapping(value = {"/{id}/restore", "/restore/{id}"}, method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<ApiResponse<NotesDto>> restoreNote(
             @PathVariable Integer id,
             HttpServletRequest request) {
@@ -259,7 +299,7 @@ public class NotesController {
             HttpServletRequest request) {
 
         String userId = GatewayHeaders.getUserId(request);
-        NotesDto note = notesService.getNoteById(id, userId);
+        NotesDto note = notesService.getNoteByIdOrFileDetailsId(id, userId);
 
         if (note.getFileDetails() == null) {
             return ResponseEntity.notFound().build();

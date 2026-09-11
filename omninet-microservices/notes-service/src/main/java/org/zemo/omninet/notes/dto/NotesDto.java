@@ -1,5 +1,6 @@
 package org.zemo.omninet.notes.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class NotesDto {
     private Integer categoryId;
     private String categoryName;
     private String categoryColor;
+    private CategoryDto category;
     private FileDetails fileDetails;
     private Boolean isPinned;
     private Boolean isFavorite;
@@ -29,15 +31,34 @@ public class NotesDto {
     private LocalDateTime createdOn;
     private LocalDateTime updatedOn;
 
+    @JsonProperty("createdDate")
+    public LocalDateTime getCreatedDate() {
+        return createdOn;
+    }
+
     public static NotesDto fromEntity(Notes entity) {
         if (entity == null) return null;
+        Integer catId = entity.getCategory() != null ? entity.getCategory().getId() : null;
+        String catName = entity.getCategory() != null ? entity.getCategory().getName() : null;
+        String catColor = entity.getCategory() != null ? entity.getCategory().getColorHex() : null;
+
+        CategoryDto catDto = entity.getCategory() != null ? CategoryDto.fromEntity(entity.getCategory()) : null;
+        if (catDto == null && (catId != null || catName != null)) {
+            catDto = CategoryDto.builder()
+                    .id(catId)
+                    .name(catName != null ? catName : "General")
+                    .colorHex(catColor != null ? catColor : "#6366f1")
+                    .build();
+        }
+
         return NotesDto.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
                 .description(entity.getDescription())
-                .categoryId(entity.getCategory() != null ? entity.getCategory().getId() : null)
-                .categoryName(entity.getCategory() != null ? entity.getCategory().getName() : null)
-                .categoryColor(entity.getCategory() != null ? entity.getCategory().getColorHex() : null)
+                .categoryId(catId)
+                .categoryName(catName)
+                .categoryColor(catColor)
+                .category(catDto)
                 .fileDetails(entity.getFileDetails())
                 .isPinned(entity.getIsPinned())
                 .isFavorite(entity.getIsFavorite())
