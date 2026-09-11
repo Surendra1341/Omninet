@@ -9,6 +9,7 @@ import ProgressModal from './Modals/ProgressModal';
 import CreateFolderModal from './Modals/CreateFolderModal';
 import RenameModal from './Modals/RenameModal';
 import DeleteConfirmModal from './Modals/DeleteConfirmModal';
+import FileActionModal from './Modals/FileActionModal';
 import { storageClient } from '../../services/storageClient';
 
 const FileExplorer = () => {
@@ -40,6 +41,8 @@ const FileExplorer = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [progressInfo, setProgressInfo] = useState({});
+  const [fileActionItem, setFileActionItem] = useState(null);
+  const [isFileActionWorking, setIsFileActionWorking] = useState(false);
   
   // Context menu state
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, item: null });
@@ -265,18 +268,35 @@ const FileExplorer = () => {
   };
 
   const handleDownload = async (item) => {
+    setFileActionItem(item);
+  };
+
+  const performDownload = async () => {
+    if (!fileActionItem) return;
     try {
-      console.log('Downloading item:', item);
-      const result = await storageClient.downloadFile(item.path);
+      setIsFileActionWorking(true);
+      const result = await storageClient.downloadFile(fileActionItem.path);
       if (result.success) {
-        toast.success(`Downloaded ${item.name}`);
+        toast.success(`Downloaded ${fileActionItem.name}`);
+        setFileActionItem(null);
       } else {
         toast.error(result.error);
       }
     } catch (error) {
       console.error('Download error:', error);
       toast.error('Download failed');
+    } finally {
+      setIsFileActionWorking(false);
     }
+  };
+
+  const performPreview = async () => {
+    if (!fileActionItem) return;
+    setIsFileActionWorking(true);
+    const result = await storageClient.previewFile(fileActionItem.path);
+    setIsFileActionWorking(false);
+    if (result.success) setFileActionItem(null);
+    else toast.error(result.error);
   };
 
   const handleRename = async (newName) => {
@@ -372,14 +392,8 @@ const FileExplorer = () => {
       const start = Math.min(lastSelectedIndex, index);
       const end = Math.max(lastSelectedIndex, index);
       const rangeItems = allItems.slice(start, end + 1).map(rangeItem => {
-        // Fix path construction to avoid double slashes
-        let itemPath;
-        if (!currentPath || currentPath === '') {
-          itemPath = rangeItem.name;
-        } else {
-          const cleanCurrentPath = currentPath.replace(/\/+$/, '');
-          itemPath = rangeItem.path || `${cleanCurrentPath}/${rangeItem.name}`;
-        }
+        const cleanCurrentPath = currentPath ? currentPath.replace(/\/+$/, '') : '';
+        const itemPath = rangeItem.path || (cleanCurrentPath ? `${cleanCurrentPath}/${rangeItem.name}` : rangeItem.name);
         
         return {
           ...rangeItem,
@@ -390,13 +404,8 @@ const FileExplorer = () => {
       setSelectedItems(rangeItems);
     } else {
       // Single select - ensure proper path and type
-      let itemPath;
-      if (!currentPath || currentPath === '') {
-        itemPath = item.name;
-      } else {
-        const cleanCurrentPath = currentPath.replace(/\/+$/, '');
-        itemPath = item.path || `${cleanCurrentPath}/${item.name}`;
-      }
+      const cleanCurrentPath = currentPath ? currentPath.replace(/\/+$/, '') : '';
+      const itemPath = item.path || (cleanCurrentPath ? `${cleanCurrentPath}/${item.name}` : item.name);
       
       const selectedItem = {
         ...item,
@@ -410,25 +419,12 @@ const FileExplorer = () => {
 
   const handleItemDoubleClick = (item) => {
     const itemType = item.type || (folders.includes(item) ? 'folder' : 'file');
+    const cleanCurrentPath = currentPath ? currentPath.replace(/\/+$/, '') : '';
     if (itemType === 'folder') {
-      // Fix path construction to avoid double slashes
-      let folderPath;
-      if (!currentPath || currentPath === '') {
-        folderPath = item.name;
-      } else {
-        const cleanCurrentPath = currentPath.replace(/\/+$/, '');
-        folderPath = item.path || `${cleanCurrentPath}/${item.name}`;
-      }
+      const folderPath = item.path || (cleanCurrentPath ? `${cleanCurrentPath}/${item.name}` : item.name);
       navigateTo(folderPath);
     } else {
-      // Fix path construction to avoid double slashes
-      let filePath;
-      if (!currentPath || currentPath === '') {
-        filePath = item.name;
-      } else {
-        const cleanCurrentPath = currentPath.replace(/\/+$/, '');
-        filePath = item.path || `${cleanCurrentPath}/${item.name}`;
-      }
+      const filePath = item.path || (cleanCurrentPath ? `${cleanCurrentPath}/${item.name}` : item.name);
       handleDownload({ ...item, path: filePath });
     }
   };
@@ -483,15 +479,9 @@ const FileExplorer = () => {
   // Filter and sort items
   const filteredAndSortedItems = React.useMemo(() => {
     // Combine folders and files with proper structure
+    const cleanCurrentPath = currentPath ? currentPath.replace(/\/+$/, '') : '';
     const foldersWithType = folders.map((folder, index) => {
-      // Fix path construction to avoid double slashes
-      let folderPath;
-      if (!currentPath || currentPath === '') {
-        folderPath = folder.name;
-      } else {
-        const cleanCurrentPath = currentPath.replace(/\/+$/, '');
-        folderPath = folder.path || `${cleanCurrentPath}/${folder.name}`;
-      }
+      const folderPath = folder.path || (cleanCurrentPath ? `${cleanCurrentPath}/${folder.name}` : folder.name);
       
       return {
         ...folder,
@@ -504,14 +494,7 @@ const FileExplorer = () => {
     });
 
     const filesWithType = files.map((file, index) => {
-      // Fix path construction to avoid double slashes
-      let filePath;
-      if (!currentPath || currentPath === '') {
-        filePath = file.name;
-      } else {
-        const cleanCurrentPath = currentPath.replace(/\/+$/, '');
-        filePath = file.path || `${cleanCurrentPath}/${file.name}`;
-      }
+      const filePath = file.path || (cleanCurrentPath ? `${cleanCurrentPath}/${file.name}` : file.name);
       
       return {
         ...file,
@@ -695,6 +678,14 @@ const FileExplorer = () => {
           onCancel={() => setShowDeleteConfirm(false)}
         />
       )}
+
+      <FileActionModal
+        item={fileActionItem}
+        isWorking={isFileActionWorking}
+        onClose={() => !isFileActionWorking && setFileActionItem(null)}
+        onPreview={performPreview}
+        onDownload={performDownload}
+      />
 
       {showProgress && (
         <ProgressModal

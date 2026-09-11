@@ -1,5 +1,27 @@
 import { storageAPI } from './api';
 
+const previewMimeTypes = {
+  pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+  gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml', txt: 'text/plain',
+  json: 'application/json', xml: 'application/xml', html: 'text/html', htm: 'text/html'
+};
+
+const previewMimeType = (fileName, responseType) => {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  return responseType && responseType !== 'application/octet-stream'
+    ? responseType
+    : previewMimeTypes[extension] || 'application/octet-stream';
+};
+
+const normalizeRelativePath = (rawPath, fallbackName) => {
+  if (!rawPath) return fallbackName || '';
+  // Strip leading 'users/<email>/' if present
+  let clean = rawPath.replace(/^users\/[^/]+\/?/, '');
+  // Strip trailing slashes for folders
+  clean = clean.replace(/\/+$/, '');
+  return clean || fallbackName || '';
+};
+
 /**
  * Enhanced storage client with composed operations
  * Provides higher-level abstractions over the base storage APIs
@@ -41,21 +63,23 @@ export class StorageClient {
         // Handle array format
         if (Array.isArray(data)) {
           data.forEach(item => {
-            if (item.type === 'folder' || item.directory || !item.name.includes('.')) {
+            const isFolder = item.type === 'folder' || item.directory || item.isFolder || item.folder;
+            const itemPath = normalizeRelativePath(item.fullPath || item.path, item.name);
+            if (isFolder) {
               result.folders.push({
                 name: item.name,
                 type: 'folder',
-                path: item.path || item.name,
-                size: item.size || 0,
-                lastModified: item.lastModified || item.modifiedDate
+                path: itemPath,
+                size: item.size ?? item.sizeBytes ?? 0,
+                lastModified: item.lastModified ?? item.lastModifiedEpochMs ?? item.modifiedDate
               });
             } else {
               result.files.push({
                 name: item.name,
                 type: 'file',
-                path: item.path || item.name,
-                size: item.size || 0,
-                lastModified: item.lastModified || item.modifiedDate,
+                path: itemPath,
+                size: item.size ?? item.sizeBytes ?? 0,
+                lastModified: item.lastModified ?? item.lastModifiedEpochMs ?? item.modifiedDate,
                 mimeType: item.mimeType || item.contentType
               });
             }
@@ -67,12 +91,16 @@ export class StorageClient {
           result.files = (data.files || []).map(file => ({
             ...file,
             type: 'file',
-            path: file.path || file.name
+            path: normalizeRelativePath(file.fullPath || file.path, file.name),
+            size: file.size ?? file.sizeBytes ?? 0,
+            lastModified: file.lastModified ?? file.lastModifiedEpochMs ?? file.modifiedDate
           }));
           result.folders = (data.folders || []).map(folder => ({
             ...folder,
             type: 'folder',
-            path: folder.path || folder.name
+            path: normalizeRelativePath(folder.fullPath || folder.path, folder.name),
+            size: folder.size ?? folder.sizeBytes ?? 0,
+            lastModified: folder.lastModified ?? folder.lastModifiedEpochMs ?? folder.modifiedDate
           }));
         }
       }
@@ -504,26 +532,20 @@ export class StorageClient {
         throw new Error('Download URL not found in response');
       }
 
-      // Determine file extension and MIME type
-      const fileExtension = fileName.split('.').pop()?.toLowerCase();
-      const viewableExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'txt', 'html', 'htm', 'json', 'xml'];
-      
-      if (viewableExtensions.includes(fileExtension)) {
-        // Open viewable files in new tab
-        console.log('Opening viewable file in new tab from URL:', downloadUrl);
-        window.open(downloadUrl, '_blank');
-      } else {
-        // Download non-viewable files
-        console.log('Downloading file from URL:', downloadUrl);
-        
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = fileName.split('/').pop();
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      console.log('Downloading file from URL:', downloadUrl);
+      const fileResponse = await fetch(downloadUrl);
+      if (!fileResponse.ok) {
+        throw new Error(fileResponse.status === 404 ? 'This file is no longer available in storage. Please upload it again.' : 'Storage could not download this file.');
       }
+      const blob = await fileResponse.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = fileName.split('/').pop() || 'download';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
 
       return {
         success: true,
@@ -531,7 +553,7 @@ export class StorageClient {
           fileName, 
           downloadUrl: downloadUrl,
           expiresIn: response.data?.expiresIn,
-          action: viewableExtensions.includes(fileExtension) ? 'opened' : 'downloaded'
+          action: 'downloaded'
         }
       };
     } catch (error) {
@@ -540,6 +562,30 @@ export class StorageClient {
         success: false,
         error: error.message || 'Download failed'
       };
+    }
+  }
+
+  async previewFile(fileName) {
+    const previewWindow = window.open('about:blank', '_blank');
+    try {
+      console.log('Requesting preview URL for fileName:', fileName);
+      const response = await storageAPI.getDownloadUrl(fileName);
+      if (!response?.success || !response.data?.url) {
+        if (previewWindow) previewWindow.close();
+        throw new Error(response?.message || 'Unable to prepare a preview for this file.');
+      }
+
+      const previewUrl = response.data.url;
+      if (previewWindow) {
+        previewWindow.location.href = previewUrl;
+      } else {
+        window.open(previewUrl, '_blank', 'noopener,noreferrer');
+      }
+      return { success: true, url: previewUrl };
+    } catch (error) {
+      if (previewWindow) previewWindow.close();
+      console.error('Preview error:', error);
+      return { success: false, error: error.message || 'Preview failed' };
     }
   }
 

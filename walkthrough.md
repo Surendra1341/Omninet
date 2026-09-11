@@ -295,3 +295,39 @@ dist/assets/index-CuUPo96Q.css     62.54 kB
 dist/assets/index-QdJI6uVZ.js   1,061.41 kB
 ```
 The React frontend builds cleanly and connects to the Reactive Gateway at `http://localhost:8080`.
+ 
+---
+
+## 6. Storage Preview, Download & Path Resolution Fix
+
+### Root Causes Identified
+1. **404 Not Found on Preview / Download**:
+   - Files stored inside subfolders (e.g., `users/kr494167@gmail.com/Testing/206810867.png`) were requested by the frontend using bare filenames (`206810867.png`).
+   - S3 backend generated presigned URLs strictly for `users/kr494167@gmail.com/206810867.png`, returning 404 from MinIO.
+2. **Folder Classification & Double-Click**:
+   - `FileInfoResponse.java` serialized `isFolder` as `"folder": true/false`.
+   - Frontend `storageClient.js` checked `item.type === 'folder' || item.directory || item.isFolder` (missing `item.folder`), causing folders like `Testing` to be treated as files.
+   - `FileExplorer.jsx` stripped folder prefixes when `currentPath` was empty.
+3. **PDF Preview Triggering Download / Corruption**:
+   - S3 Presigned URLs did not have `response-content-type` or `response-content-disposition=inline`, defaulting to `application/octet-stream`.
+   - Browser navigation to blob URLs forced download rather than opening the native PDF viewer.
+
+### Changes Applied
+1. **`S3StorageService.java`**:
+   - Added `resolveS3Key(userEmail, fileName)` which searches user S3 prefixes as a fallback when a bare filename is passed.
+   - Added `determineContentType(s3Key)` to automatically detect MIME types (`application/pdf`, `image/png`, `image/jpeg`, etc.).
+   - Updated `generatePresignedDownloadUrl` to sign `responseContentType(contentType)` and `responseContentDisposition("inline; filename=...")`.
+   - Updated `deleteFile` and `fileExists` to use `resolveS3Key`.
+2. **`FileInfoResponse.java`**:
+   - Explicitly annotated `@JsonProperty("isFolder")` on the `isFolder` field directly (removing conflicting getter alias annotations that caused Jackson `JsonMappingException: Conflicting/ambiguous property name definitions`).
+3. **`storageClient.js`**:
+   - Added `normalizeRelativePath` to strip S3 user prefixes (`users/{email}/`) and trailing slashes.
+   - Updated `getContents` to check `item.folder` and populate `path` cleanly.
+   - Updated `previewFile` to open presigned URLs in a new browser tab with inline disposition.
+4. **`FileExplorer.jsx`**:
+   - Preserved `item.path` in `filteredAndSortedItems`, `handleItemSelect`, and `handleItemDoubleClick`.
+
+### Verification
+- `http://localhost:8082/api/v1/storage/files/download-url?fileName=206810867.png` returns HTTP 200 with MinIO status 200 (`image/png`, 50,438 bytes).
+- `http://localhost:8082/api/v1/storage/files/download-url?fileName=Gmail_-_Internship_Confirmation_Java_Backend_Developer_Intern.pdf` returns HTTP 200 with MinIO status 200 (`application/pdf`, 45,992 bytes, valid `%PDF-1.4`).
+- Frontend production bundle `npm run build` compiled cleanly in 5.54s.

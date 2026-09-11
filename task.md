@@ -95,3 +95,11 @@
 - [x] Profile page & Token management utilities
 - [x] Frontend verified with `npm run build` (success)
 
+## Phase 9: Storage Preview, Download & Path Resolution Fixes
+- [x] Backend S3 key resolution: `resolveS3Key` in `S3StorageService.java` resolves bare filenames and subfolder keys (`users/{email}/...`)
+- [x] S3 presigned URL response headers: signed `responseContentType` and `responseContentDisposition("inline; filename=...")` for browser in-tab preview
+- [x] `FileInfoResponse.java`: Clean `@JsonProperty("isFolder")` field annotation, resolving Jackson getter property conflict that caused 500 on `/api/storage/contents`
+- [x] Frontend `storageClient.js`: `normalizeRelativePath`, `item.folder` recognition, and tab-based inline preview
+- [x] Frontend `FileExplorer.jsx`: Preserved folder prefixes (`item.path`) on click, double-click, and download/preview actions
+- [x] End-to-end verified with real MinIO storage: PNG and PDF preview/download verified returning HTTP 200 with valid binary streams
+

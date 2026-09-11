@@ -175,12 +175,17 @@ public class S3StorageService {
     }
 
     public PresignedUrlResponse generatePresignedDownloadUrl(String userId, String userEmail, String fileName, int expirySeconds) {
-        String s3Key = buildS3Key(userEmail, fileName);
+        String s3Key = resolveS3Key(userEmail, fileName);
         int expiry = expirySeconds > 0 ? expirySeconds : 3600;
+
+        String contentType = determineContentType(s3Key);
+        String baseFileName = s3Key.contains("/") ? s3Key.substring(s3Key.lastIndexOf('/') + 1) : s3Key;
 
         GetObjectRequest objectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(s3Key)
+                .responseContentType(contentType)
+                .responseContentDisposition("inline; filename=\"" + baseFileName + "\"")
                 .build();
 
         GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
@@ -268,7 +273,7 @@ public class S3StorageService {
 
     @Transactional
     public boolean deleteFile(String userId, String userEmail, String fileName) {
-        String s3Key = fileName.startsWith("users/") ? fileName : buildS3Key(userEmail, fileName);
+        String s3Key = resolveS3Key(userEmail, fileName);
 
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key(s3Key).build());
@@ -293,7 +298,7 @@ public class S3StorageService {
     }
 
     public boolean fileExists(String userId, String userEmail, String fileName) {
-        String s3Key = fileName.startsWith("users/") ? fileName : buildS3Key(userEmail, fileName);
+        String s3Key = resolveS3Key(userEmail, fileName);
         return s3ObjectExists(s3Key);
     }
 
@@ -383,6 +388,66 @@ public class S3StorageService {
                 .usagePercentage(Math.round(percentage * 10.0) / 10.0)
                 .fileCount(fileCount)
                 .build();
+    }
+
+    public String resolveS3Key(String userEmail, String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            return buildS3Key(userEmail, "");
+        }
+
+        // 1. Direct path check
+        String directKey = buildS3Key(userEmail, fileName);
+        if (s3ObjectExists(directKey)) {
+            return directKey;
+        }
+
+        // 2. If caller passed a path that already exists in S3
+        if (s3ObjectExists(fileName)) {
+            return fileName;
+        }
+
+        // 3. Fallback search: search within the user's bucket prefix for matching filename
+        try {
+            String userPrefix = "users/" + userEmail + "/";
+            String targetFileName = fileName.contains("/") ? fileName.substring(fileName.lastIndexOf('/') + 1) : fileName;
+
+            ListObjectsV2Response response = s3Client.listObjectsV2(
+                    ListObjectsV2Request.builder()
+                            .bucket(bucketName)
+                            .prefix(userPrefix)
+                            .build()
+            );
+
+            for (S3Object obj : response.contents()) {
+                if (obj.key().endsWith("/" + targetFileName) || obj.key().equals(userPrefix + targetFileName)) {
+                    log.info("Resolved S3 key '{}' for requested filename '{}'", obj.key(), fileName);
+                    return obj.key();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error resolving S3 key for user {} file {}: {}", userEmail, fileName, e.getMessage());
+        }
+
+        // Default fallback to direct key
+        return directKey;
+    }
+
+    private String determineContentType(String s3Key) {
+        String lower = s3Key.toLowerCase();
+        if (lower.endsWith(".pdf")) return "application/pdf";
+        if (lower.endsWith(".png")) return "image/png";
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+        if (lower.endsWith(".gif")) return "image/gif";
+        if (lower.endsWith(".webp")) return "image/webp";
+        if (lower.endsWith(".svg")) return "image/svg+xml";
+        if (lower.endsWith(".txt") || lower.endsWith(".log")) return "text/plain";
+        if (lower.endsWith(".html") || lower.endsWith(".htm")) return "text/html";
+        if (lower.endsWith(".json")) return "application/json";
+        if (lower.endsWith(".csv")) return "text/csv";
+        if (lower.endsWith(".mp3")) return "audio/mpeg";
+        if (lower.endsWith(".wav")) return "audio/wav";
+        if (lower.endsWith(".mp4")) return "video/mp4";
+        return "application/octet-stream";
     }
 
     private String buildS3Key(String userEmail, String fileName) {

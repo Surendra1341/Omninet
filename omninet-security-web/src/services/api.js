@@ -360,6 +360,19 @@ export const todoAPI = {
 // Storage API
 
 export const storageAPI = {
+  uploadFile: async (file, folderPath, onProgress) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (folderPath) formData.append('folderPath', folderPath);
+    const response = await api.post('/api/storage/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (event) => {
+        if (event.total && onProgress) onProgress((event.loaded / event.total) * 100);
+      }
+    });
+    return response.data;
+  },
+
   // Api to get a PreSignedUrl to upload a file.
   getUploadUrl: async (fileName) => {
     try {
