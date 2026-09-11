@@ -1,14 +1,13 @@
-function Dashboard() {
-  const loremText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
-  const repeatedLorem = Array(30).fill(loremText).join(" ");
-  return (
-    <div>
-      <h1 className="text-3xl font-bold underline">Dashboard</h1>
-      <p>{repeatedLorem}</p>
-      <p>{repeatedLorem}</p>
-      <p>{repeatedLorem}</p>
-    </div>
-  );
-}
+import { createElement } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRightIcon, CheckCircleIcon, FolderIcon, RectangleStackIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
-export default Dashboard;
+const actions = [
+  { to: '/home/notes', icon: RectangleStackIcon, label: 'Write a note', detail: 'Capture an idea before it leaves.' },
+  { to: '/home/todo', icon: CheckCircleIcon, label: 'Plan today', detail: 'Turn loose ends into a clear list.' },
+  { to: '/home/storage', icon: FolderIcon, label: 'Open files', detail: 'Pick up where your project paused.' },
+];
+
+export default function Dashboard() {
+  return <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:py-10"><section className="rounded-box border border-base-300 bg-base-100 p-6 sm:p-8"><div className="max-w-2xl"><p className="text-sm font-medium text-primary">Your workspace</p><h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Make room for good work.</h1><p className="mt-3 leading-7 text-base-content/60">Start with the one thing that will make the rest of today easier.</p></div><div className="mt-7 grid gap-3 md:grid-cols-3">{actions.map(({ to, icon, label, detail }) => <Link key={to} to={to} className="group rounded-box border border-base-300 p-4 transition hover:border-base-content/20 hover:bg-base-200">{createElement(icon, { className: 'size-5' })}<div className="mt-5 flex items-center justify-between"><span className="font-medium">{label}</span><ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-1" /></div><p className="mt-1 text-sm text-base-content/55">{detail}</p></Link>)}</div></section><section className="mt-5 grid gap-5 lg:grid-cols-[1.45fr_1fr]"><article className="card border border-base-300 bg-base-100"><div className="card-body"><div className="flex items-center justify-between"><h2 className="card-title text-lg">A quieter way to organize</h2><SparklesIcon className="size-5 text-base-content/45" /></div><p className="max-w-xl text-sm leading-6 text-base-content/60">Keep your source material in Files, turn it into Notes, and use Tasks for the commitments that matter. Each section is deliberately focused so the interface does not compete for your attention.</p><div className="card-actions mt-3"><Link className="btn btn-sm" to="/home/ai-chat">Ask the assistant <ArrowRightIcon className="size-4" /></Link></div></div></article><article className="card border border-base-300 bg-base-100"><div className="card-body"><h2 className="card-title text-lg">A small reminder</h2><p className="text-sm leading-6 text-base-content/60">You do not need to organize everything at once. Open one area, make one decision, then continue.</p></div></article></section></main>;
+}

@@ -31,12 +31,8 @@ export const ThemeProvider = ({ children }) => {
     try {
       localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
       
-      // Toggle Tailwind dark mode class on document root
-      if (isDarkMode) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      document.documentElement.dataset.theme = isDarkMode ? 'omninet-night' : 'omninet';
+      document.documentElement.classList.toggle('dark', isDarkMode);
     } catch (error) {
       console.error('Error in theme effect:', error);
     }

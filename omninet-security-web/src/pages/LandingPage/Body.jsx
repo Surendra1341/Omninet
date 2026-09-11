@@ -1,176 +1,40 @@
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import { Security, Shield, Lock, Verified } from '@mui/icons-material';
-import { Fade, Slide } from '@mui/material';
-import { theme } from '../../theme.js';
+import { createElement, useLayoutEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import gsap from 'gsap';
+import { ArrowRightIcon, CheckCircleIcon, FolderIcon, LockClosedIcon, RectangleStackIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
-function Body() {
-    const features = [
-        {
-            icon: <Security sx={{ fontSize: 40, color: 'white' }} />,
-            title: 'Advanced Security',
-            description: 'Military-grade encryption to protect your data'
-        },
-        {
-            icon: <Shield sx={{ fontSize: 40, color: 'white' }} />,
-            title: 'Complete Protection',
-            description: 'Comprehensive security solutions for all your needs'
-        },
-        {
-            icon: <Lock sx={{ fontSize: 40, color: 'white' }} />,
-            title: 'Privacy First',
-            description: 'Your privacy is our top priority, always'
-        },
-        {
-            icon: <Verified sx={{ fontSize: 40, color: 'white' }} />,
-            title: 'Trusted Platform',
-            description: 'Verified and trusted by thousands of users'
-        }
-    ];
+const features = [
+  { icon: FolderIcon, title: 'A place for every file', description: 'Keep projects, references, and attachments together without losing the thread.' },
+  { icon: RectangleStackIcon, title: 'Notes that stay useful', description: 'Capture the detail now, then find it quickly when the work resumes.' },
+  { icon: SparklesIcon, title: 'Help when you need it', description: 'Use the assistant for a thoughtful second pass, not a noisy distraction.' },
+];
 
-    return (
-        <Container maxWidth="xl" sx={{ py: 4, minHeight: '80vh' }}>
-            {/* Hero Section */}
-            <Box sx={{ 
-                mt: { xs: 8, sm: 12, md: 15, lg: 18 },
-                textAlign: 'center',
-                mb: 8
-            }}>
-                <Fade in timeout={1000}>
-                    <Typography 
-                        variant="h1" 
-                        sx={{
-                            fontFamily: theme.font.family,
-                            fontWeight: 800,
-                            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5rem' },
-                            background: `linear-gradient(45deg, ${theme.colors.font} 30%, ${theme.colors.fontLight} 90%)`,
-                            backgroundClip: 'text',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            mb: 2,
-                            letterSpacing: '-0.02em'
-                        }}
-                    >
-                        OmniNet
-                    </Typography>
-                </Fade>
+export default function Body() {
+  const root = useRef(null);
+  useLayoutEffect(() => {
+    const context = gsap.context(() => {
+      gsap.from('[data-intro]', { y: 18, opacity: 0, duration: 0.72, stagger: 0.1, ease: 'power2.out' });
+      gsap.from('[data-feature]', { y: 24, opacity: 0, duration: 0.6, stagger: 0.1, delay: 0.35, ease: 'power2.out' });
+    }, root);
+    return () => context.revert();
+  }, []);
 
-                <Fade in timeout={1200}>
-                    <Typography 
-                        variant="h5" 
-                        sx={{
-                            color: theme.colors.fontBody,
-                            fontWeight: 300,
-                            mb: 4,
-                            fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.6rem' },
-                            maxWidth: '600px',
-                            mx: 'auto',
-                            lineHeight: 1.6
-                        }}
-                    >
-                        Your security is our priority. Experience next-generation protection with our comprehensive security solutions.
-                    </Typography>
-                </Fade>
+  return <main ref={root}>
+    <section className="relative overflow-hidden px-5 pb-20 pt-20 sm:pb-28 sm:pt-28">
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 size-[42rem] -translate-x-1/2 rounded-full bg-primary/8 blur-3xl" />
+      <div className="mx-auto max-w-3xl text-center">
+        <div data-intro className="badge badge-outline border-base-300 bg-base-100 px-3 py-3 text-base-content/65"><LockClosedIcon className="mr-1 size-3.5" />Private by design</div>
+        <h1 data-intro className="mt-6 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-6xl">Your work, in a calmer place.</h1>
+        <p data-intro className="mx-auto mt-6 max-w-2xl text-base leading-7 text-base-content/65 sm:text-lg">OmniNet gives your notes, tasks, files, and useful AI conversations one quiet home—so you can focus on the next important thing.</p>
+        <div data-intro className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Link to="/register" className="btn btn-primary">Create your workspace <ArrowRightIcon className="size-4" /></Link><Link to="/login" className="btn btn-ghost">I already have an account</Link></div>
+        <p data-intro className="mt-4 text-xs text-base-content/45">No setup maze. Start with one small thing.</p>
+      </div>
+    </section>
 
-                <Slide direction="up" in timeout={1400}>
-                    <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Button
-                            variant="contained"
-                            size="large"
-                            onClick={() => window.location.href = '/login'}
-                            sx={{
-                                py: 2,
-                                px: 4,
-                                borderRadius: 3,
-                                background: theme.colors.primary,
-                                boxShadow: `0 8px 20px ${theme.colors.primary}40`,
-                                fontSize: '1.1rem',
-                                fontWeight: 600,
-                                textTransform: 'none',
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    transform: 'translateY(-3px)',
-                                    boxShadow: `0 12px 25px ${theme.colors.primary}50`,
-                                    background: theme.colors.secondary
-                                }
-                            }}
-                        >
-                            Get Started
-                        </Button>
-                    </Box>
-                </Slide>
-            </Box>
+    <section id="how-it-works" className="border-y border-base-300 bg-base-100 px-5 py-16 sm:py-20">
+      <div className="mx-auto max-w-6xl"><div className="mb-9 max-w-xl"><p className="text-sm font-medium text-primary">A focused workspace</p><h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Everything has a clear next step.</h2></div><div className="grid gap-4 md:grid-cols-3">{features.map(({ icon, title, description }) => <article data-feature key={title} className="card border border-base-300 bg-base-100 shadow-sm"><div className="card-body gap-3 p-6"><span className="grid size-10 place-items-center rounded-xl bg-base-200">{createElement(icon, { className: 'size-5' })}</span><h3 className="card-title text-base">{title}</h3><p className="text-sm leading-6 text-base-content/60">{description}</p></div></article>)}</div></div>
+    </section>
 
-            {/* Features Section */}
-            <Fade in timeout={1600}>
-                <Grid container spacing={4} sx={{ mt: 8 }}>
-                    {features.map((feature, index) => (
-                        <Grid item xs={12} sm={6} md={3} key={index}>
-                            <Card
-                                sx={{
-                                    height: '100%',
-                                    background: theme.colors.background,
-                                    border: `1px solid ${theme.colors.border}`,
-                                    borderRadius: 3,
-                                    transition: 'all 0.3s ease',
-                                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                                    '&:hover': {
-                                        transform: 'translateY(-10px)',
-                                        border: `1px solid ${theme.colors.primary}`,
-                                        boxShadow: `0 20px 40px ${theme.colors.primary}20`
-                                    }
-                                }}
-                            >
-                                <CardContent sx={{ p: 3, textAlign: 'center' }}>
-                                    <Box
-                                        sx={{
-                                            width: 80,
-                                            height: 80,
-                                            borderRadius: '50%',
-                                            background: `linear-gradient(45deg, ${theme.colors.primary} 30%, ${theme.colors.primaryLight} 90%)`,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            mx: 'auto',
-                                            mb: 2,
-                                            boxShadow: `0 8px 20px ${theme.colors.primary}30`
-                                        }}
-                                    >
-                                        {feature.icon}
-                                    </Box>
-                                    <Typography
-                                        variant="h6"
-                                        sx={{
-                                            color: theme.colors.font,
-                                            fontWeight: 700,
-                                            mb: 1,
-                                            fontSize: '1.2rem'
-                                        }}
-                                    >
-                                        {feature.title}
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            color: theme.colors.fontBody,
-                                            lineHeight: 1.6
-                                        }}
-                                    >
-                                        {feature.description}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-            </Fade>
-        </Container>
-    );
+    <section id="privacy" className="px-5 py-16"><div className="mx-auto grid max-w-5xl items-center gap-8 rounded-box border border-base-300 bg-base-100 p-7 sm:p-10 md:grid-cols-[1fr_auto]"><div><p className="text-sm font-medium text-primary">Thoughtful protection</p><h2 className="mt-2 text-2xl font-semibold tracking-tight">Private work should feel simple.</h2><p className="mt-3 max-w-xl text-sm leading-6 text-base-content/60">Authentication and account controls are built into your workspace, so your day-to-day tools do not ask you to trade convenience for confidence.</p></div><div className="flex gap-3 text-sm"><CheckCircleIcon className="size-5 shrink-0 text-success" /><span>Designed around a secure account and familiar, predictable controls.</span></div></div></section>
+  </main>;
 }
-
-export default Body;

@@ -1,4 +1,78 @@
 @import "tailwindcss";
+@plugin "daisyui" {
+  themes: omninet --default, omninet-night;
+  logs: false;
+}
+
+@plugin "daisyui/theme" {
+  name: "omninet";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+  --color-base-100: oklch(99% 0.004 95);
+  --color-base-200: oklch(97% 0.008 95);
+  --color-base-300: oklch(91% 0.014 95);
+  --color-base-content: oklch(27% 0.018 155);
+  --color-primary: oklch(47% 0.07 164);
+  --color-primary-content: oklch(99% 0.004 95);
+  --color-secondary: oklch(58% 0.045 195);
+  --color-secondary-content: oklch(99% 0.004 95);
+  --color-accent: oklch(64% 0.065 88);
+  --color-accent-content: oklch(20% 0.018 90);
+  --color-neutral: oklch(27% 0.018 155);
+  --color-neutral-content: oklch(98% 0.004 95);
+  --color-info: oklch(62% 0.065 230);
+  --color-info-content: oklch(99% 0.004 95);
+  --color-success: oklch(58% 0.09 150);
+  --color-success-content: oklch(99% 0.004 95);
+  --color-warning: oklch(76% 0.11 85);
+  --color-warning-content: oklch(26% 0.025 80);
+  --color-error: oklch(58% 0.12 30);
+  --color-error-content: oklch(99% 0.004 95);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.65rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: "omninet-night";
+  default: false;
+  prefersdark: false;
+  color-scheme: dark;
+  --color-base-100: oklch(21% 0.014 160);
+  --color-base-200: oklch(18% 0.012 160);
+  --color-base-300: oklch(25% 0.016 160);
+  --color-base-content: oklch(94% 0.01 95);
+  --color-primary: oklch(73% 0.07 164);
+  --color-primary-content: oklch(19% 0.016 160);
+  --color-secondary: oklch(72% 0.045 195);
+  --color-secondary-content: oklch(18% 0.012 160);
+  --color-accent: oklch(78% 0.08 88);
+  --color-accent-content: oklch(21% 0.014 160);
+  --color-neutral: oklch(13% 0.01 160);
+  --color-neutral-content: oklch(94% 0.01 95);
+  --color-info: oklch(73% 0.065 230);
+  --color-info-content: oklch(19% 0.016 160);
+  --color-success: oklch(72% 0.09 150);
+  --color-success-content: oklch(19% 0.016 160);
+  --color-warning: oklch(82% 0.11 85);
+  --color-warning-content: oklch(22% 0.02 80);
+  --color-error: oklch(72% 0.12 30);
+  --color-error-content: oklch(19% 0.016 160);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.65rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -9,7 +83,13 @@ body {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--color-base-200);
+  color: var(--color-base-content);
 }
+
+html { scroll-behavior: auto; }
+
+::selection { background: oklch(var(--p) / 0.18); }
 
 /* Telegram-like subtle chat background */
 .chat-bg-telegram {

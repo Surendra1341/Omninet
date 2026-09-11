@@ -1,7 +1,6 @@
-import { useEffect} from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuthStore } from './store/authStore';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage/LoginPage';
@@ -19,34 +18,28 @@ function App() {
 
   if (isLoading) {
     return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: 'grey.50'
-        }}
-      >
-        <CircularProgress sx={{ color: 'primary.main' }} />
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-          Loading...
-        </Typography>
-      </Box>
+      <main className="grid min-h-screen place-items-center bg-base-200">
+        <div className="flex items-center gap-3 text-sm text-base-content/60">
+          <span className="loading loading-spinner loading-md" aria-hidden="true" />
+          Preparing your workspace
+        </div>
+      </main>
     );
   }
 
   return (
     <Router>
-      <div className="App">
+      <div className="App min-h-screen bg-base-200">
         <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#363636',
-              color: '#fff',
+              background: 'var(--color-base-100)',
+              color: 'var(--color-base-content)',
+              border: '1px solid var(--color-base-300)',
+              borderRadius: '0.75rem',
+              boxShadow: '0 12px 28px rgba(27, 39, 35, 0.12)',
             },
             success: {
               duration: 3000,
@@ -121,17 +114,3 @@ function App() {
 }
 
 export default App;
-
-
-// import React from 'react'
-// import AiChat from './pages/AiChat/AiChat'
-
-// const App = () => {
-//   return (
-//     <div>
-//       <AiChat></AiChat>
-//     </div>
-//   )
-// }
-
-// export default App

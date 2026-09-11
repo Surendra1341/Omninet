@@ -1,8 +1,7 @@
+import { useEffect } from "react";
 import { useAuthStore } from "../store/authStore";
 import toast from "react-hot-toast";
 import Navbar from "./Navbar";
-import Container from "@mui/material/Container";
-import Footer from "./Footer";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Storage from "../pages/Storage/Storage";
@@ -12,17 +11,25 @@ import Notes from "../pages/Notes/Notes";
 import Category from "../pages/Category/Category";
 import Chat from "../pages/Chat/Chat";
 import AiChat from "../pages/AiChat/AiChat";
-import {
-  Box,
-  CircularProgress,
-  Typography,
-  Button,
-  Alert,
-} from "@mui/material";
 import { ThemeProvider } from "../contexts/ThemeContext";
+import Lenis from "lenis";
 
 const Home = () => {
   const { user, logout, logoutAll, isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    const lenis = new Lenis({ duration: 0.9, smoothWheel: true, touchMultiplier: 1.2 });
+    let frame;
+    const raf = (time) => {
+      lenis.raf(time);
+      frame = requestAnimationFrame(raf);
+    };
+    frame = requestAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(frame);
+      lenis.destroy();
+    };
+  }, []);
 
   // console.log('Dashboard - User:', user);
   // console.log('Dashboard - IsAuthenticated:', isAuthenticated);
@@ -49,45 +56,17 @@ const Home = () => {
 
   // Show loading state if user data is not available yet
   if (!user && isAuthenticated) {
-    return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="100vh"
-      >
-        <CircularProgress color="primary" />
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-          Loading user data...
-        </Typography>
-      </Box>
-    );
+    return <div className="grid min-h-screen place-items-center"><span className="loading loading-spinner" /></div>;
   }
 
   // Show error state if we should be authenticated but have no user
   if (!user) {
-    return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="100vh"
-      >
-        <Alert severity="error" sx={{ mb: 2 }}>
-          Error loading user data
-        </Alert>
-        <Button variant="contained" onClick={() => window.location.reload()}>
-          Reload Page
-        </Button>
-      </Box>
-    );
+    return <main className="grid min-h-screen place-items-center p-6"><div role="alert" className="alert alert-error max-w-md"><span>We couldn’t load your workspace.</span><button className="btn btn-sm" onClick={() => window.location.reload()}>Reload</button></div></main>;
   }
 
   return (
     <ThemeProvider>
-      <Container maxWidth={false} disableGutters sx={{ padding: 0, margin: 0 }}>
+      <div className="min-h-screen">
         <Navbar
           handleLogout={handleLogout}
           handleLogoutAll={handleLogoutAll}
@@ -109,7 +88,7 @@ const Home = () => {
           />
         </Routes>
         {/* <Footer /> */}
-      </Container>
+      </div>
     </ThemeProvider>
   );
 };
