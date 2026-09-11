@@ -1,0 +1,49 @@
+### Login via email
+POST http://localhost:8080/api/auth/login/email HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "apkfile96@gmail.com",
+    "password": "apkfile96"
+}
+### Login via email
+POST http://localhost:8080/api/auth/login/email HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "yadveersinghpawar12345@gmail.com",
+    "password": "yadveer123"
+}
+
+### Category Create
+POST http://localhost:8080/api/v1/category/save
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJuYW1lIjoiYXBrIGZpbGUiLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJ1c2VySWQiOiIxMDQwMDA2NDk1Nzk1MTA2ODkzNjciLCJlbWFpbCI6ImFwa2ZpbGU5NkBnbWFpbC5jb20iLCJzdWIiOiIxMDQwMDA2NDk1Nzk1MTA2ODkzNjciLCJpc3MiOiJvbW5pbmV0LXNlY3VyaXR5IiwiaWF0IjoxNzU1NzkwNzE3LCJleHAiOjE3NTU3OTQzMTd9.EFGgpX4B4s4r9Up1AY8ZiGHK7K3M_o1PfddY7k7v4Saq-vD3MNyaKqMfbgiOdW0mMJMZ7ZAQBMnXc4ZtwHSsjA
+Content-Type: application/json
+
+{
+    "name" : "Programmmmm",
+    "description" : "very goodmmm",
+    "isActive": true
+}
+
+### Notes API
+
+POST http://localhost:8080/api/v1/notes/
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJuYW1lIjoiYXBrIGZpbGUiLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJ1c2VySWQiOiIxMDQwMDA2NDk1Nzk1MTA2ODkzNjciLCJlbWFpbCI6ImFwa2ZpbGU5NkBnbWFpbC5jb20iLCJzdWIiOiIxMDQwMDA2NDk1Nzk1MTA2ODkzNjciLCJpc3MiOiJvbW5pbmV0LXNlY3VyaXR5IiwiaWF0IjoxNzU1NTg3NzY1LCJleHAiOjE3NTU1OTEzNjV9.g75Biiok2rjbR658HiXijirdP9AQkTb6wrP09GEI4zMkngUa1v-k1mlpZ9d_-soaQtEyR79jqBy8PW5V9tyN7w
+Content-Type: multipart/form-data:
+--boundary
+Content-Disposition: form-data; name="notes"
+
+{
+  "title": "My First Note",
+  "description": "This is a demo note without file",
+  "category": {
+    "name": "Programming"
+  }
+}
+--boundary--
+
+### Get Category
+
+GET http://localhost:8080/api/v1/category/category
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJuYW1lIjoiYXBrIGZpbGUiLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJ1c2VySWQiOiIxMDQwMDA2NDk1Nzk1MTA2ODkzNjciLCJlbWFpbCI6ImFwa2ZpbGU5NkBnbWFpbC5jb20iLCJzdWIiOiIxMDQwMDA2NDk1Nzk1MTA2ODkzNjciLCJpc3MiOiJvbW5pbmV0LXNlY3VyaXR5IiwiaWF0IjoxNzU3ODQ4NTk0LCJleHAiOjE3NTc4NTIxOTR9.PdHX2GaU_vvJ62cYOEGdegMuF8QFVo9TNgSSCoRP3IzTqZxJTxV7mXULccHXXT1niTBK7VFhdnM6bBTbZQZ1UQ

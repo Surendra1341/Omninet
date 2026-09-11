@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package org.zemo.omninet.proto;
+
+option java_multiple_files = true;
+option java_package = "org.zemo.omninet.proto.auth";
+option java_outer_classname = "AuthProto";
+
+// User lookup and validation service exposed by auth-service
+service UserService {
+
+  // Retrieve a user by their unique ID
+  rpc GetUserById (GetUserByIdRequest) returns (UserResponse);
+
+  // Retrieve a user by their email address
+  rpc GetUserByEmail (GetUserByEmailRequest) returns (UserResponse);
+
+  // Check if a user exists by email
+  rpc UserExists (UserExistsRequest) returns (UserExistsResponse);
+
+  // Retrieve multiple users by their IDs (batch lookup)
+  rpc GetUsersByIds (GetUsersByIdsRequest) returns (GetUsersByIdsResponse);
+}
+
+// ─── Request / Response Messages ────────────────────────────────────────────
+
+message GetUserByIdRequest {
+  string user_id = 1;
+}
+
+message GetUserByEmailRequest {
+  string email = 1;
+}
+
+message UserExistsRequest {
+  string email = 1;
+}
+
+message UserExistsResponse {
+  bool exists = 1;
+}
+
+message GetUsersByIdsRequest {
+  repeated string user_ids = 1;
+}
+
+message GetUsersByIdsResponse {
+  repeated UserResponse users = 1;
+}
+
+message UserResponse {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string avatar_url = 4;
+  string provider = 5;
+  bool email_verified = 6;
+  int64 created_at_epoch_ms = 7;
+  int64 last_login_at_epoch_ms = 8;
+}

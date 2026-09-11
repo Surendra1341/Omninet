@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package org.zemo.omninet.proto;
+
+option java_multiple_files = true;
+option java_package = "org.zemo.omninet.proto.storage";
+option java_outer_classname = "StorageProto";
+
+// Object storage service exposed by storage-service
+// Used by notes-service (file attachments) and ai-service (audio files)
+service StorageService {
+
+  // Generate a presigned URL for uploading a file
+  rpc GenerateUploadUrl (PresignedUrlRequest) returns (PresignedUrlResponse);
+
+  // Generate a presigned URL for downloading a file
+  rpc GenerateDownloadUrl (PresignedUrlRequest) returns (PresignedUrlResponse);
+
+  // Upload file content directly (for internal service-to-service transfers)
+  rpc UploadFile (UploadFileRequest) returns (UploadFileResponse);
+
+  // Download file content directly (for internal service-to-service transfers)
+  rpc DownloadFile (DownloadFileRequest) returns (DownloadFileResponse);
+
+  // Delete a file
+  rpc DeleteFile (DeleteFileRequest) returns (DeleteFileResponse);
+
+  // Create a folder
+  rpc CreateFolder (CreateFolderRequest) returns (CreateFolderResponse);
+
+  // Delete a folder
+  rpc DeleteFolder (DeleteFolderRequest) returns (DeleteFolderResponse);
+
+  // Check if a file exists
+  rpc FileExists (FileExistsRequest) returns (FileExistsResponse);
+
+  // List contents of a folder
+  rpc ListContents (ListContentsRequest) returns (ListContentsResponse);
+}
+
+// ─── Request / Response Messages ────────────────────────────────────────────
+
+message PresignedUrlRequest {
+  string user_email = 1;
+  string file_name = 2;      // Relative path within user's storage, e.g. "documents/report.pdf"
+  int32 expiry_seconds = 3;   // URL expiry time, defaults to 3600 if 0
+}
+
+message PresignedUrlResponse {
+  string url = 1;
+  string file_name = 2;
+  int64 expires_at_epoch_ms = 3;
+}
+
+message UploadFileRequest {
+  string file_path = 1;       // Full object path, e.g. "users/user@example.com/documents/file.pdf"
+  bytes content = 2;
+  string content_type = 3;
+}
+
+message UploadFileResponse {
+  bool success = 1;
+  string file_path = 2;
+  int64 size_bytes = 3;
+}
+
+message DownloadFileRequest {
+  string file_path = 1;
+}
+
+message DownloadFileResponse {
+  bytes content = 1;
+  string content_type = 2;
+  int64 size_bytes = 3;
+}
+
+message DeleteFileRequest {
+  string user_email = 1;
+  string file_name = 2;
+}
+
+message DeleteFileResponse {
+  bool success = 1;
+}
+
+message CreateFolderRequest {
+  string user_email = 1;
+  string folder_name = 2;
+}
+
+message CreateFolderResponse {
+  bool created = 1;           // false if folder already exists
+  string folder_path = 2;
+}
+
+message DeleteFolderRequest {
+  string user_email = 1;
+  string folder_name = 2;
+}
+
+message DeleteFolderResponse {
+  bool success = 1;
+}
+
+message FileExistsRequest {
+  string file_path = 1;
+}
+
+message FileExistsResponse {
+  bool exists = 1;
+}
+
+message ListContentsRequest {
+  string user_email = 1;
+  string folder_name = 2;    // Empty or "root" for user's root folder
+}
+
+message ListContentsResponse {
+  repeated FileInfo items = 1;
+}
+
+message FileInfo {
+  string name = 1;
+  string full_path = 2;
+  int64 size_bytes = 3;
+  int64 last_modified_epoch_ms = 4;
+  bool is_folder = 5;
+}

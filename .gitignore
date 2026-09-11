@@ -1,0 +1,271 @@
+# ==============================================================================
+# Omninet - Root .gitignore
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Environment Variables & Secrets (CRITICAL)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+*.env
+*.env.local
+*.env.*.local
+!.env.example
+!.env*.example
+!*.env.example
+
+# Certificates, Keystores & Private Keys
+*.pem
+*.key
+*.cert
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+
+# API Credentials & Service Accounts
+*credentials*.json
+*secret*.json
+service-account*.json
+google-services.json
+firebase.json
+
+# SSH Keys
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# ------------------------------------------------------------------------------
+# Build Tools & Compilers (Java / Spring Boot / Maven / Gradle)
+# ------------------------------------------------------------------------------
+target/
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.nar-unpacked
+*.ctxt
+
+# JVM Crash & Replay Logs
+hs_err_pid*
+replay_pid*
+
+# Maven Wrapper & Timing
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (if used)
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ------------------------------------------------------------------------------
+# Python (Omninet-Core Speech Service / Scripts)
+# ------------------------------------------------------------------------------
+# Bytecode & Caches
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Packaging & Distribution
+*.egg-info/
+.installed.cfg
+*.egg
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+
+# Python Testing & Coverage
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# Jupyter & AI/ML Models / Weights / Runtime Caches
+.ipynb_checkpoints
+tts_models/
+.whisper/
+whisper_models/
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# ------------------------------------------------------------------------------
+# Node.js & Frontend (React / Vite / TypeScript)
+# ------------------------------------------------------------------------------
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+dist-ssr/
+.vite/
+*.local
+
+# Package Manager Caches
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Frontend Build & Lint Caches
+.eslintcache
+*.tsbuildinfo
+.turbo/
+
+# ------------------------------------------------------------------------------
+# Docker, Containers & Local Infrastructure Volumes
+# ------------------------------------------------------------------------------
+docker-compose.override.yml
+docker-compose*.override.yml
+
+# Local Database & Storage Mounts
+postgres_data/
+**/postgres_data/
+redis_data/
+**/redis_data/
+kafka_data/
+**/kafka_data/
+minio_data/
+**/minio_data/
+ollama_data/
+**/ollama_data/
+
+# Local Database Dumps & Files
+dump.rdb
+*.db
+*.sqlite
+*.sqlite3
+
+# Process IDs & Seeds
+*.pid
+*.seed
+*.pid.lock
+
+# ------------------------------------------------------------------------------
+# Logs & Diagnostics
+# ------------------------------------------------------------------------------
+logs/
+**/logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# IDEs, Text Editors & Operating System
+# ------------------------------------------------------------------------------
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+bin/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+
+# Visual Studio / Windows Dev Tools
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+*.ntvs*
+*.njsproj
+*.sln
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Temporary & Swap Files
+*.swp
+*.swo
+*.swn
+.*.sw?
+*~
+*.bak
+*.tmp
+*.temp
+.#*
+\#*#
+
+# AI Assistants & Coding Agent Artifacts (Local Configs/Caches)
+.agent/
+.agents/
+.claude/
+.cursor/
+.cline/
+.windsurf/
+.gemini/
+
+# OS-Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ------------------------------------------------------------------------------
+# Testing & Code Quality
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+test-results/
+.cache/

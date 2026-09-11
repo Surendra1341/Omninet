@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package org.zemo.omninet.proto;
+
+option java_multiple_files = true;
+option java_package = "org.zemo.omninet.proto.ai";
+option java_outer_classname = "AiProto";
+
+// Speech processing service — wraps Python STT/TTS gRPC services
+service SpeechService {
+
+  // Convert audio bytes to text (Speech-to-Text)
+  rpc RecognizeSpeech (RecognizeSpeechRequest) returns (RecognizeSpeechResponse);
+
+  // Convert text to audio bytes (Text-to-Speech)
+  rpc SynthesizeSpeech (SynthesizeSpeechRequest) returns (SynthesizeSpeechResponse);
+}
+
+// ─── Request / Response Messages ────────────────────────────────────────────
+
+message RecognizeSpeechRequest {
+  bytes audio_data = 1;
+  string audio_format = 2;     // e.g. "wav", "webm", "mp3"
+  string language_code = 3;    // e.g. "en-US", defaults to "en-US" if empty
+}
+
+message RecognizeSpeechResponse {
+  string text = 1;
+  double confidence = 2;       // Recognition confidence score (0.0 - 1.0)
+  bool success = 3;
+}
+
+message SynthesizeSpeechRequest {
+  string text = 1;
+  string language_code = 2;
+  string voice_name = 3;      // Optional: specific voice to use
+  double speaking_rate = 4;    // 0.5 to 2.0, defaults to 1.0
+}
+
+message SynthesizeSpeechResponse {
+  bytes audio_data = 1;
+  string audio_format = 2;    // Output format, e.g. "wav"
+  bool success = 3;
+}

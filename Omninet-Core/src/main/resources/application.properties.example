@@ -1,0 +1,92 @@
+# example application.properties
+
+spring.application.name=omninet-security
+server.port=8080
+
+spring.security.oauth2.client.registration.github.client-id=${GITHUB_CLIENT_ID:clientID}
+spring.security.oauth2.client.registration.github.client-secret=${GITHUB_CLIENT_SECRET:key}
+spring.security.oauth2.client.registration.github.scope=user,user:email
+spring.security.oauth2.client.provider.github.user-info-uri=https://api.github.com/user
+spring.security.oauth2.client.provider.github.user-name-attribute=id
+
+spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID:yourID}
+spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET:key}
+spring.security.oauth2.client.registration.google.scope=openid,profile,email
+
+spring.mail.host=${MAIL_HOST:smtp.gmail.com}
+spring.mail.port=${MAIL_PORT:587}
+spring.mail.username=${MAIL_USERNAME:udaykhare77@gmail.com}
+spring.mail.password=${MAIL_PASSWORD:pass}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.ssl.trust=smtp.gmail.com
+
+logging.level.org.springframework.security=INFO
+logging.level.org.springframework.security.oauth2=INFO
+
+spring.datasource.url=${DATABASE_URL:jdbc:postgresql://localhost:5432/omninet?currentSchema=public}
+spring.datasource.username=${DATABASE_USERNAME:uday}
+spring.datasource.password=${DATABASE_PASSWORD:Uday}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.hbm2ddl.auto=update
+
+# JWT Configuration
+jwt.secret=${JWT_SECRET:mySecretKey1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
+jwt.access-token-expiration=3600000
+jwt.refresh-token-expiration=2592000000
+jwt.issuer=omninet-security
+
+# minio configuration
+minio.url=http://localhost:9090
+minio.access-key=uday
+minio.secret-key=Uday@88717
+minio.bucket.name=omninet
+
+#surendra
+
+# --- Added from YAML; not overwriting existing values, just appending missing ones ---
+
+spring.servlet.multipart.max-file-size=50MB
+spring.servlet.multipart.max-request-size=50MB
+
+spring.profiles.active=dev
+
+file.upload.path=files/
+
+# springdoc configuration
+springdoc.api-docs.path=/Omninet-api-doc
+springdoc.swagger-ui.path=/Omninet-doc
+springdoc.swagger-ui.operations-sorter=method
+springdoc.swagger-ui.tags-sorter=alpha
+springdoc.swagger-ui.doc-expansion=none
+springdoc.swagger-ui.display-request-duration=true
+springdoc.swagger-ui.filter=true
+
+# management/actuator configuration
+management.endpoints.web.exposure.include=*
+management.endpoints.web.exposure.exclude=beans,loggers
+management.endpoint.shutdown.enabled=true
+
+management.endpoint.health.show-details=always
+
+# rabbit mq configs
+spring.rabbitmq.host=localhost
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
+
+chat.rabbitmq.exchange=chat.direct
+chat.rabbitmq.queue.prefix=chat.user.
+
+cleanup.initial-delay-ms=10000
+cleanup.fixed-delay-ms=3600000
+
+# Spring AI Ollama
+spring.ai.ollama.base-url=url=http://localhost:11434
+spring.ai.ollama.model=gemma3:1b

@@ -1,0 +1,114 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:}
+      timeout: 2000ms
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowed-origins:
+                  - "http://localhost:5173"
+                  - "http://localhost:3000"
+                  - "http://localhost:3001"
+                  - "http://127.0.0.1:5173"
+                allowed-methods:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                allowed-headers:
+                  - "*"
+                allow-credentials: true
+                max-age: 3600
+
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+            - name: JwtAuthentication
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@userKeyResolver}"
+
+          routes:
+            # Auth Service Routes
+            - id: auth-service-auth
+              uri: ${AUTH_SERVICE_URI:http://localhost:8081}
+              predicates:
+                - Path=/api/v1/auth/**, /api/auth/**
+
+            - id: auth-service-users
+              uri: ${AUTH_SERVICE_URI:http://localhost:8081}
+              predicates:
+                - Path=/api/v1/users/**, /api/users/**
+
+            - id: auth-service-oauth2
+              uri: ${AUTH_SERVICE_URI:http://localhost:8081}
+              predicates:
+                - Path=/oauth2/**, /login/**
+
+            - id: auth-service-dashboard
+              uri: ${AUTH_SERVICE_URI:http://localhost:8081}
+              predicates:
+                - Path=/api/dashboard/**
+
+            # Storage Service Routes
+            - id: storage-service
+              uri: ${STORAGE_SERVICE_URI:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/storage/**, /api/storage/**
+
+            # Notes Service Routes
+            - id: notes-service-notes
+              uri: ${NOTES_SERVICE_URI:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/notes/**, /api/notes/**
+
+            - id: notes-service-todos
+              uri: ${NOTES_SERVICE_URI:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/todos/**, /api/todos/**, /api/v1/todo/**, /api/todo/**
+
+            - id: notes-service-categories
+              uri: ${NOTES_SERVICE_URI:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/categories/**, /api/categories/**, /api/v1/category/**, /api/category/**
+
+            # AI Service Routes
+            - id: ai-service
+              uri: ${AI_SERVICE_URI:http://localhost:8084}
+              predicates:
+                - Path=/api/v1/ai/**, /api/ai/**, /api/chat/**, /api/speech/**
+
+            # WebSocket / SockJS Route
+            - id: ai-service-ws
+              uri: ${AI_SERVICE_URI:http://localhost:8084}
+              predicates:
+                - Path=/ws/**
+
+jwt:
+  secret: ${JWT_SECRET:omninet_super_secret_jwt_signing_key_that_is_at_least_256_bits_long_for_hmac_sha256}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
