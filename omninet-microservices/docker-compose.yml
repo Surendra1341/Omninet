@@ -218,6 +218,29 @@ services:
     networks:
       - omninet-net
 
+  chat-service:
+    build:
+      context: ./chat-service
+      dockerfile: Dockerfile
+    container_name: omninet-chat-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      PORT: 8085
+      DB_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/omninet_chat
+      REDIS_URL: redis://redis:6379
+      KAFKA_BROKERS: kafka:29092
+      JWT_SECRET: ${JWT_SECRET:-omninet_super_secret_jwt_signing_key_that_is_at_least_256_bits_long_for_hmac_sha256}
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,http://localhost:5174
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - omninet-net
+
 networks:
   omninet-net:
     name: omninet-network

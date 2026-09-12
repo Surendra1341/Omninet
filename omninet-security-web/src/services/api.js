@@ -517,31 +517,8 @@ export const storageAPI = {
   }
 };
 
-// Chat API
-
-export const chatAPI = {
-  // Contact Management
-  addContact: async (data) => {
-    const response = await api.post('/contacts/add', data);
-    return response.data;
-  },
-
-  listContacts: async () => {
-    const response = await api.get('/contacts/list');
-    return response.data;
-  },
-
-  // Message Management
-  getMessageHistory: async (otherEmail, page = 0, size = 20) => {
-    const response = await api.get(`/messages/history?otherEmail=${encodeURIComponent(otherEmail)}&page=${page}&size=${size}`);
-    return response.data;
-  },
-
-  markMessagesAsRead: async (data) => {
-    const response = await api.post('/messages/mark-read', data);
-    return response.data;
-  },
-};
+// Chat API (Delegated to chatService)
+export { chatApi as chatAPI } from './chatService';
 
 // AI Chat API
 export const aiChatAPI = {

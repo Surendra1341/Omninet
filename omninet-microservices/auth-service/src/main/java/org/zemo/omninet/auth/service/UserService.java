@@ -89,6 +89,14 @@ public class UserService {
         return userRepository.findByIdIn(ids);
     }
 
+    public List<User> searchUsers(String query, String excludeUserId) {
+        if (query == null || query.isBlank() || query.length() < 2) {
+            return List.of();
+        }
+        return userRepository.searchByNameOrEmail(query.trim(), excludeUserId != null ? excludeUserId : "")
+                .stream().limit(20).toList();
+    }
+
     @Transactional
     public User saveUser(User user) {
         return userRepository.save(user);

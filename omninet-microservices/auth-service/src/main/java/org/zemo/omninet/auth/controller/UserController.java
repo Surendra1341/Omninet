@@ -1,5 +1,6 @@
 package org.zemo.omninet.auth.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.zemo.omninet.auth.dto.UserDto;
 import org.zemo.omninet.auth.model.User;
 import org.zemo.omninet.auth.service.UserService;
 import org.zemo.omninet.common.dto.ApiResponse;
+import org.zemo.omninet.common.security.GatewayHeaders;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,6 +82,25 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(updated, "Profile updated successfully"));
     }
 
+    /**
+     * Search users by name or email — used for group creation in chat.
+     * Returns only public-safe fields (id, name, email, avatarUrl).
+     * GET /api/v1/users/search?q=alice
+     */
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<UserSearchDto>>> searchUsers(
+            @RequestParam(name = "q", defaultValue = "") String query,
+            HttpServletRequest request) {
+
+        String callerUserId = GatewayHeaders.getUserId(request);
+        List<UserSearchDto> results = userService.searchUsers(query, callerUserId)
+                .stream()
+                .map(u -> new UserSearchDto(u.getId(), u.getName(), u.getEmail(), u.getAvatarUrl()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponse.success(results, "Search results"));
+    }
+
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<UserDto>> getUserById(@PathVariable String userId) {
         User user = userService.getUserById(userId);
@@ -101,4 +122,6 @@ public class UserController {
         private String name;
         private String avatarUrl;
     }
+
+    public record UserSearchDto(String id, String name, String email, String avatarUrl) {}
 }
