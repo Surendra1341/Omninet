@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
-import FlagIcon from '@mui/icons-material/Flag';
-import RepeatIcon from '@mui/icons-material/Repeat';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import {
+  XMarkIcon,
+  FlagIcon,
+  ArrowPathIcon,
+  TagIcon,
+  PlusIcon,
+  TrashIcon,
+  CheckIcon,
+  CalendarDaysIcon
+} from '@heroicons/react/24/outline';
 
 const PRIORITY_OPTIONS = [
-  { value: 'URGENT', label: 'Urgent', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800/60' },
-  { value: 'HIGH', label: 'High', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800/60' },
-  { value: 'MEDIUM', label: 'Medium', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/60' },
-  { value: 'LOW', label: 'Low', color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700' }
+  { value: 'URGENT', label: 'Urgent', badge: 'badge-error text-white' },
+  { value: 'HIGH', label: 'High', badge: 'badge-warning' },
+  { value: 'MEDIUM', label: 'Medium', badge: 'badge-info' },
+  { value: 'LOW', label: 'Low', badge: 'badge-ghost' }
 ];
 
 const RECURRENCE_OPTIONS = [
   { value: 'NONE', label: 'Does not repeat' },
-  { value: 'DAILY', label: 'Repeats Daily 🔁' },
-  { value: 'WEEKLY', label: 'Repeats Weekly 🔁' },
-  { value: 'MONTHLY', label: 'Repeats Monthly 🔁' }
+  { value: 'DAILY', label: 'Repeats Daily' },
+  { value: 'WEEKLY', label: 'Repeats Weekly' },
+  { value: 'MONTHLY', label: 'Repeats Monthly' }
 ];
 
 const POPULAR_TAGS = ['work', 'personal', 'project', 'meeting', 'urgent', 'study'];
@@ -191,23 +192,23 @@ function TodoModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden my-8 animate-fade-in flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="card bg-base-100 border border-base-300 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden my-8 animate-fade-in flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-base-200 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
-              <AddIcon className="w-5 h-5" />
+            <div className="p-2 bg-primary/10 text-primary rounded-xl">
+              <PlusIcon className="w-5 h-5 stroke-2" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h2 className="text-base font-bold text-base-content tracking-tight">
               {initialData ? 'Edit Task' : 'Create New Task'}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition"
+            className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-base-content rounded-lg"
           >
-            <CloseIcon className="w-5 h-5" />
+            <XMarkIcon className="w-4 h-4" />
           </button>
         </div>
 
@@ -215,8 +216,8 @@ function TodoModal({
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
           {/* Title */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-              Task Title <span className="text-red-500">*</span>
+            <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
+              Task Title <span className="text-error">*</span>
             </label>
             <input
               type="text"
@@ -225,13 +226,13 @@ function TodoModal({
               placeholder="e.g., Review API documentation, Design landing page..."
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              className="input input-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl focus:border-primary"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
               Notes & Details (Optional)
             </label>
             <textarea
@@ -239,7 +240,7 @@ function TodoModal({
               placeholder="Add extra context, links, or instructions..."
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              className="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-y"
+              className="textarea textarea-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl focus:border-primary resize-y"
             />
           </div>
 
@@ -247,8 +248,8 @@ function TodoModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Priority Selector */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                <FlagIcon style={{ fontSize: '1rem' }} />
+              <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <FlagIcon className="w-3.5 h-3.5" />
                 <span>Priority</span>
               </label>
               <div className="grid grid-cols-2 gap-1.5">
@@ -257,13 +258,13 @@ function TodoModal({
                     key={opt.value}
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, priority: opt.value }))}
-                    className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center justify-center gap-1 cursor-pointer ${
+                    className={`btn btn-xs rounded-xl font-medium gap-1 ${
                       formData.priority === opt.value
-                        ? `${opt.bg} ${opt.color} shadow-xs`
-                        : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'btn-primary'
+                        : 'btn-ghost bg-base-200/60 text-base-content/70'
                     }`}
                   >
-                    <FlagIcon style={{ fontSize: '0.85rem' }} className={opt.color} />
+                    <FlagIcon className="w-3 h-3" />
                     <span>{opt.label}</span>
                   </button>
                 ))}
@@ -272,13 +273,13 @@ function TodoModal({
 
             {/* Status Selector */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
                 Status
               </label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
-                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                className="select select-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl"
               >
                 <option value="NOT_STARTED">To Do (Not Started)</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -290,29 +291,29 @@ function TodoModal({
           {/* Due Date & Quick Shortcuts */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1">
-                <CalendarMonthIcon style={{ fontSize: '1rem' }} />
+              <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider flex items-center gap-1">
+                <CalendarDaysIcon className="w-3.5 h-3.5" />
                 <span>Due Date & Time</span>
               </label>
               <div className="flex items-center gap-1 text-xs">
                 <button
                   type="button"
                   onClick={() => handleQuickDate('today')}
-                  className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-gray-600 dark:text-gray-300 hover:text-blue-600 text-[11px] font-medium transition"
+                  className="btn btn-ghost btn-xs rounded-lg text-[11px] font-medium"
                 >
                   Today
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDate('tomorrow')}
-                  className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-gray-600 dark:text-gray-300 hover:text-blue-600 text-[11px] font-medium transition"
+                  className="btn btn-ghost btn-xs rounded-lg text-[11px] font-medium"
                 >
                   Tomorrow
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDate('next_week')}
-                  className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-gray-600 dark:text-gray-300 hover:text-blue-600 text-[11px] font-medium transition"
+                  className="btn btn-ghost btn-xs rounded-lg text-[11px] font-medium"
                 >
                   Next Week
                 </button>
@@ -320,7 +321,7 @@ function TodoModal({
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, dueDate: '' }))}
-                    className="px-2 py-0.5 text-red-500 hover:text-red-700 text-[11px] font-medium"
+                    className="btn btn-ghost btn-xs text-error text-[11px] font-medium"
                   >
                     Clear
                   </button>
@@ -331,14 +332,14 @@ function TodoModal({
               type="datetime-local"
               value={formData.dueDate}
               onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
-              className="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
+              className="input input-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl"
             />
           </div>
 
           {/* Recurring Rules */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-              <RepeatIcon style={{ fontSize: '1rem' }} />
+            <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <ArrowPathIcon className="w-3.5 h-3.5" />
               <span>Recurrence</span>
             </label>
             <select
@@ -348,7 +349,7 @@ function TodoModal({
                 recurrencePattern: e.target.value,
                 isRecurring: e.target.value !== 'NONE'
               }))}
-              className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="select select-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl"
             >
               {RECURRENCE_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>
@@ -357,15 +358,15 @@ function TodoModal({
               ))}
             </select>
             {formData.recurrencePattern !== 'NONE' && (
-              <p className="text-[11px] text-blue-600 dark:text-blue-400 mt-1">
-                🔁 When this task is completed, it will automatically schedule the next occurrence.
+              <p className="text-xs text-primary mt-1">
+                When this task is completed, it will automatically schedule the next occurrence.
               </p>
             )}
           </div>
 
           {/* Subtasks / Checklist */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
               Subtasks & Checklist ({formData.subtasks.filter(s => s.isCompleted).length}/{formData.subtasks.length})
             </label>
 
@@ -375,27 +376,27 @@ function TodoModal({
                 {formData.subtasks.map((subtask, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-xs"
+                    className="flex items-center justify-between p-2 rounded-xl bg-base-200/50 border border-base-300 text-xs"
                   >
                     <div
                       onClick={() => handleToggleSubtask(idx)}
                       className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                     >
-                      {subtask.isCompleted ? (
-                        <CheckBoxIcon style={{ fontSize: '1.1rem' }} className="text-blue-600" />
-                      ) : (
-                        <CheckBoxOutlineBlankIcon style={{ fontSize: '1.1rem' }} className="text-gray-400" />
-                      )}
-                      <span className={`truncate ${subtask.isCompleted ? 'line-through text-gray-400' : 'text-gray-800 dark:text-gray-200'}`}>
+                      <div className={`w-4 h-4 rounded flex items-center justify-center border transition ${
+                        subtask.isCompleted ? 'bg-primary border-primary text-primary-content' : 'border-base-content/30'
+                      }`}>
+                        {subtask.isCompleted && <CheckIcon className="w-3 h-3 stroke-2" />}
+                      </div>
+                      <span className={`truncate ${subtask.isCompleted ? 'line-through text-base-content/40' : 'text-base-content'}`}>
                         {subtask.title}
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveSubtask(idx)}
-                      className="p-1 text-gray-400 hover:text-red-500 transition"
+                      className="btn btn-ghost btn-xs btn-square text-base-content/40 hover:text-error rounded-lg"
                     >
-                      <DeleteOutlineIcon style={{ fontSize: '1rem' }} />
+                      <TrashIcon className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
@@ -415,13 +416,13 @@ function TodoModal({
                     handleAddSubtask();
                   }
                 }}
-                className="flex-1 px-3 py-1.5 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white outline-none focus:border-blue-500"
+                className="input input-bordered input-sm flex-1 bg-base-200/50 text-base-content text-xs rounded-xl"
               />
               <button
                 type="button"
                 onClick={handleAddSubtask}
                 disabled={!subtaskInput.trim()}
-                className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold transition disabled:opacity-50"
+                className="btn btn-primary btn-sm rounded-xl font-medium text-xs"
               >
                 Add
               </button>
@@ -430,8 +431,8 @@ function TodoModal({
 
           {/* Tags Manager */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-              <LocalOfferIcon style={{ fontSize: '1rem' }} />
+            <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <TagIcon className="w-3.5 h-3.5" />
               <span>Tags / Labels</span>
             </label>
 
@@ -440,13 +441,13 @@ function TodoModal({
               {formData.tags.map(t => (
                 <span
                   key={t}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                  className="badge badge-neutral badge-sm gap-1 font-medium"
                 >
                   #{t}
                   <button
                     type="button"
                     onClick={() => handleRemoveTag(t)}
-                    className="hover:text-red-500 ml-0.5"
+                    className="hover:text-error ml-0.5"
                   >
                     ×
                   </button>
@@ -467,27 +468,27 @@ function TodoModal({
                     handleAddTag();
                   }
                 }}
-                className="flex-1 px-3 py-1.5 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white outline-none focus:border-blue-500"
+                className="input input-bordered input-sm flex-1 bg-base-200/50 text-base-content text-xs rounded-xl"
               />
               <button
                 type="button"
                 onClick={() => handleAddTag()}
                 disabled={!tagInput.trim()}
-                className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold transition disabled:opacity-50"
+                className="btn btn-ghost btn-sm rounded-xl text-xs font-medium border border-base-300"
               >
                 + Tag
               </button>
             </div>
 
             {/* Suggested Tags */}
-            <div className="flex items-center gap-1.5 flex-wrap mt-2 text-[11px] text-gray-400">
+            <div className="flex items-center gap-1.5 flex-wrap mt-2 text-[11px] text-base-content/50">
               <span>Suggestions:</span>
               {POPULAR_TAGS.filter(t => !formData.tags.includes(t)).map(t => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => handleAddTag(t)}
-                  className="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-300 hover:text-blue-600 transition"
+                  className="btn btn-ghost btn-xs text-[11px] text-base-content/70 rounded-md"
                 >
                   +{t}
                 </button>
@@ -496,18 +497,18 @@ function TodoModal({
           </div>
 
           {/* Footer Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex justify-end gap-2 pt-4 border-t border-base-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition"
+              className="btn btn-ghost btn-sm rounded-xl font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !formData.title.trim()}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-xl text-sm font-semibold transition shadow-sm shadow-blue-500/20 active:scale-95"
+              className="btn btn-primary btn-sm rounded-xl font-medium"
             >
               {isSubmitting ? 'Saving...' : initialData ? 'Update Task' : 'Create Task'}
             </button>

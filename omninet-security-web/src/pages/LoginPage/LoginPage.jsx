@@ -1,51 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { theme } from '../../theme';
 import toast from 'react-hot-toast';
 import {
-  Box,
-  Button,
-  Container,
-  TextField,
-  Typography,
-  Paper,
-  Divider,
-  CircularProgress,
-  Alert,
-  Stack,
-  Card,
-  CardContent,
-  Avatar,
-  Fade,
-  Slide
-} from '@mui/material';
-import {
-  Email as EmailIcon,
-  GitHub as GitHubIcon,
-  Google as GoogleIcon,
-  ArrowBack as ArrowBackIcon,
-  Security as SecurityIcon
-} from '@mui/icons-material';
+  BoltIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
+  ArrowLeftIcon,
+  ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
 
-// LoginPage component handles authentication UI and logic
 const LoginPage = () => {
-  // Get query params to check for error
   const [searchParams] = useSearchParams();
-  // Auth store methods
-  const { login, loginWithEmail, clearError } = useAuthStore();
-  // Check if error param is present
+  const { login, loginWithEmail, clearError, error: storeError } = useAuthStore();
   const hasError = searchParams.get('error') === 'true';
 
-  // Local state for email login form
   const [showEmailLogin, setShowEmailLogin] = useState(false);
   const [emailData, setEmailData] = useState({
     email: '',
-    password: ''
+    password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Show toast on error and clear error on unmount
   useEffect(() => {
     if (hasError) {
       toast.error('Authentication failed. Please try again.');
@@ -53,12 +29,10 @@ const LoginPage = () => {
     return () => clearError();
   }, [hasError, clearError]);
 
-  // Handle OAuth login (GitHub/Google)
   const handleOAuthLogin = (provider) => {
     login(provider);
   };
 
-  // Handle email/password login
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     if (!emailData.email || !emailData.password) return;
@@ -66,356 +40,200 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       await loginWithEmail(emailData);
-    } catch (error) {
-      console.error('Login failed:', error);
+    } catch (err) {
+      console.error('Login failed:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Renders the email login form with animation
-  const renderEmailForm = () => (
-    <Slide direction="left" in={showEmailLogin} mountOnEnter unmountOnExit>
-      <Box component="form" onSubmit={handleEmailLogin} sx={{ mt: 2 }}>
-        <Stack spacing={3}>
-          {/* Email input */}
-          <TextField
-            fullWidth
-            id="email"
-            name="email"
-            label="Email address"
-            type="email"
-            autoComplete="email"
-            required
-            value={emailData.email}
-            onChange={(e) => setEmailData(prev => ({ ...prev, email: e.target.value }))}
-            variant="outlined"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                borderColor: theme.colors.border,
-                '&:hover': {
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                  borderColor: theme.colors.primary
-                },
-                '&.Mui-focused': {
-                  borderColor: theme.colors.primary
-                }
-              },
-              '& .MuiInputLabel-root': {
-                color: theme.colors.fontMuted,
-                fontFamily: theme.font.family,
-                '&.Mui-focused': {
-                  color: theme.colors.primary
-                }
-              }
-            }}
-          />
-
-          {/* Password input */}
-          <TextField
-            fullWidth
-            id="password"
-            name="password"
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={emailData.password}
-            onChange={(e) => setEmailData(prev => ({ ...prev, password: e.target.value }))}
-            variant="outlined"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                borderColor: theme.colors.border,
-                '&:hover': {
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                  borderColor: theme.colors.primary
-                },
-                '&.Mui-focused': {
-                  borderColor: theme.colors.primary
-                }
-              },
-              '& .MuiInputLabel-root': {
-                color: theme.colors.fontMuted,
-                fontFamily: theme.font.family,
-                '&.Mui-focused': {
-                  color: theme.colors.primary
-                }
-              }
-            }}
-          />
-
-          {/* Submit button */}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            disabled={isLoading || !emailData.email || !emailData.password}
-            size="large"
-            sx={{
-              py: 1.8,
-              borderRadius: 2,
-              background: `linear-gradient(45deg, ${theme.colors.primary} 30%, ${theme.colors.primaryLight} 90%)`,
-              boxShadow: `0 4px 20px ${theme.colors.primary}40`,
-              transition: 'all 0.3s ease',
-              fontFamily: theme.font.family,
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: `0 8px 25px ${theme.colors.primary}60`,
-                background: `linear-gradient(45deg, ${theme.colors.primary} 30%, ${theme.colors.primaryLight} 90%)`
-              },
-              '&:disabled': {
-                background: theme.colors.fontMuted,
-                transform: 'none',
-                boxShadow: 'none'
-              }
-            }}
-          >
-            {isLoading ? (
-              <>
-                <CircularProgress size={20} sx={{ mr: 1 }} color="inherit" />
-                Signing in...
-              </>
-            ) : (
-              'Sign in with Email'
-            )}
-          </Button>
-
-          {/* Back to provider options */}
-          <Box sx={{ textAlign: 'center' }}>
-            <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={() => setShowEmailLogin(false)}
-              color="primary"
-              variant="text"
-              sx={{
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                color: theme.colors.primary,
-                fontFamily: theme.font.family,
-                '&:hover': {
-                  transform: 'translateX(-5px)',
-                  bgcolor: `${theme.colors.primary}15`
-                }
-              }}
-            >
-              Back to other options
-            </Button>
-          </Box>
-        </Stack>
-      </Box>
-    </Slide>
-  );
-
-  // Main render
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryLight} 100%)`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="7" cy="7" r="1"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-          opacity: 0.3
-        }
-      }}
-    >
-      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
-        <Fade in timeout={800}>
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 4,
-              background: theme.colors.background,
-              backdropFilter: 'blur(20px)',
-              border: `1px solid ${theme.colors.borderLight}`,
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)'
-            }}
+    <main className="min-h-screen bg-base-200 text-base-content flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden selection:bg-primary/20">
+      {/* Soft background ambient glow */}
+      <div className="pointer-events-none absolute left-1/2 top-1/4 -z-10 size-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
+
+      {/* Auth Card */}
+      <div className="w-full max-w-md bg-base-100 border border-base-300 rounded-3xl shadow-xl p-7 sm:p-9 relative animate-fade-in">
+        {/* Header with Logo */}
+        <div className="text-center mb-6">
+          <Link
+            to="/landing_page"
+            className="inline-grid size-12 place-items-center rounded-2xl bg-neutral text-neutral-content mx-auto mb-3.5 shadow-sm hover:opacity-90 transition-opacity"
+            title="Go to home"
           >
-            <CardContent sx={{ p: 5 }}>
-              {/* Logo and welcome message */}
-              <Box sx={{ textAlign: 'center', mb: 4 }}>
-                <Avatar
-                  sx={{
-                    width: 80,
-                    height: 80,
-                    mx: 'auto',
-                    mb: 2,
-                    background: `linear-gradient(45deg, ${theme.colors.primary} 30%, ${theme.colors.primaryLight} 90%)`,
-                    boxShadow: `0 8px 20px ${theme.colors.primary}40`
-                  }}
-                >
-                  <SecurityIcon sx={{ fontSize: 40, color: theme.colors.background }} />
-                </Avatar>
-                <Typography 
-                  variant="h4" 
-                  component="h1" 
-                  gutterBottom 
-                  fontWeight="bold"
-                  sx={{
-                    background: `linear-gradient(45deg, ${theme.colors.primary} 30%, ${theme.colors.primaryLight} 90%)`,
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    mb: 1,
-                    fontFamily: theme.font.family
-                  }}
-                >
-                  Welcome to OmniNet Security
-                </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.8, color: theme.colors.fontBodyLight, fontFamily: theme.font.family }}>
-                  {showEmailLogin ? 'Sign in with your email and password' : 'Sign in with your preferred provider'}
-                </Typography>
-              </Box>
+            <BoltIcon className="size-6" />
+          </Link>
+          <h1 className="text-2xl font-bold tracking-tight text-base-content">
+            Welcome to OmniNet
+          </h1>
+          <p className="text-xs text-base-content/60 mt-1">
+            {showEmailLogin
+              ? 'Enter your email credentials to access your workspace'
+              : 'Sign in to access your secure workspace'}
+          </p>
+        </div>
 
-              {/* Conditional rendering for email form or provider buttons */}
-              {showEmailLogin ? (
-                renderEmailForm()
+        {/* Global Error Banner */}
+        {(hasError || storeError) && (
+          <div className="alert alert-error text-xs rounded-xl py-2.5 px-3.5 mb-5 font-medium flex items-center gap-2">
+            <ExclamationCircleIcon className="w-4 h-4 shrink-0" />
+            <span>{storeError || 'Authentication failed. Please verify your credentials.'}</span>
+          </div>
+        )}
+
+        {/* Form area */}
+        {showEmailLogin ? (
+          <form onSubmit={handleEmailLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-base-content/80 mb-1.5" htmlFor="login-email">
+                Email address
+              </label>
+              <div className="relative">
+                <EnvelopeIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                <input
+                  id="login-email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={emailData.email}
+                  onChange={(e) => setEmailData((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="name@company.com"
+                  className="input input-bordered input-sm w-full pl-10 bg-base-100 border-base-300 rounded-xl text-base-content placeholder:text-base-content/40 focus:border-primary"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-base-content/80 mb-1.5" htmlFor="login-password">
+                Password
+              </label>
+              <div className="relative">
+                <LockClosedIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                <input
+                  id="login-password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={emailData.password}
+                  onChange={(e) => setEmailData((prev) => ({ ...prev, password: e.target.value }))}
+                  placeholder="••••••••"
+                  className="input input-bordered input-sm w-full pl-10 bg-base-100 border-base-300 rounded-xl text-base-content placeholder:text-base-content/40 focus:border-primary"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading || !emailData.email || !emailData.password}
+              className="btn btn-primary btn-sm w-full rounded-xl text-xs font-semibold shadow-xs mt-2"
+            >
+              {isLoading ? (
+                <>
+                  <span className="loading loading-spinner loading-xs" />
+                  <span>Signing in...</span>
+                </>
               ) : (
-                <Fade in={!showEmailLogin} timeout={600}>
-                  <Stack spacing={3}>
-                    {/* Email Login Button */}
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      size="large"
-                      startIcon={<EmailIcon />}
-                      onClick={() => setShowEmailLogin(true)}
-                      sx={{
-                        py: 1.8,
-                        borderRadius: 2,
-                        background: `linear-gradient(45deg, ${theme.colors.primary} 30%, ${theme.colors.primaryLight} 90%)`,
-                        boxShadow: `0 4px 20px ${theme.colors.primary}40`,
-                        transition: 'all 0.3s ease',
-                        fontFamily: theme.font.family,
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: `0 8px 25px ${theme.colors.primary}60`
-                        }
-                      }}
-                    >
-                      Sign in with Email
-                    </Button>
-
-                    <Divider sx={{ my: 2 }}>
-                      <Typography variant="body2" sx={{ px: 2, opacity: 0.7, color: theme.colors.fontMuted, fontFamily: theme.font.family }}>
-                        Or continue with
-                      </Typography>
-                    </Divider>
-
-                    {/* GitHub Login Button */}
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      size="large"
-                      startIcon={<GitHubIcon />}
-                      onClick={() => handleOAuthLogin('github')}
-                      sx={{
-                        py: 1.8,
-                        borderRadius: 2,
-                        bgcolor: '#24292e',
-                        boxShadow: '0 4px 20px rgba(36, 41, 46, 0.3)',
-                        transition: 'all 0.3s ease',
-                        fontFamily: theme.font.family,
-                        '&:hover': {
-                          bgcolor: '#1a1e22',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 8px 25px rgba(36, 41, 46, 0.4)'
-                        }
-                      }}
-                    >
-                      Sign in with GitHub
-                    </Button>
-
-                    {/* Google Login Button */}
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      size="large"
-                      startIcon={<GoogleIcon />}
-                      onClick={() => handleOAuthLogin('google')}
-                      sx={{
-                        py: 1.8,
-                        borderRadius: 2,
-                        color: theme.colors.fontBody,
-                        borderColor: theme.colors.border,
-                        borderWidth: 2,
-                        background: theme.colors.backgroundLight,
-                        transition: 'all 0.3s ease',
-                        fontFamily: theme.font.family,
-                        '&:hover': {
-                          bgcolor: `${theme.colors.secondary}15`,
-                          borderColor: theme.colors.secondary,
-                          color: theme.colors.secondary,
-                          transform: 'translateY(-2px)',
-                          boxShadow: `0 8px 25px ${theme.colors.secondary}30`
-                        }
-                      }}
-                    >
-                      Sign in with Google
-                    </Button>
-                  </Stack>
-                </Fade>
+                'Sign In'
               )}
+            </button>
 
-              {/* Error alert if authentication fails */}
-              {hasError && (
-                <Fade in timeout={300}>
-                  <Alert 
-                    severity="error" 
-                    sx={{ 
-                      mt: 3, 
-                      borderRadius: 2,
-                      fontFamily: theme.font.family,
-                      '& .MuiAlert-icon': {
-                        fontSize: 20
-                      }
-                    }}
-                  >
-                    Authentication failed. Please try again.
-                  </Alert>
-                </Fade>
-              )}
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEmailLogin(false);
+                  clearError();
+                }}
+                className="btn btn-ghost btn-xs text-base-content/60 hover:text-base-content gap-1.5"
+              >
+                <ArrowLeftIcon className="w-3.5 h-3.5" />
+                <span>Back to other options</span>
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-3">
+            {/* Sign in with Email */}
+            <button
+              type="button"
+              onClick={() => setShowEmailLogin(true)}
+              className="btn btn-primary btn-sm w-full rounded-xl text-xs font-semibold shadow-xs flex items-center justify-center gap-2"
+            >
+              <EnvelopeIcon className="w-4 h-4" />
+              <span>Sign in with Email</span>
+            </button>
 
-              {/* Link to registration and terms */}
-              <Box sx={{ textAlign: 'center', mt: 4 }}>
-                <Typography variant="body2" sx={{ opacity: 0.8, color: theme.colors.fontMuted, fontFamily: theme.font.family }}>
-                  Don't have an account?{' '}
-                  <Link 
-                    to="/register" 
-                    style={{ 
-                      color: theme.colors.primary, 
-                      textDecoration: 'none',
-                      fontWeight: 500,
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    Sign up here
-                  </Link>
-                </Typography>
-                <Typography variant="caption" sx={{ mt: 1, display: 'block', opacity: 0.6, color: theme.colors.fontMuted, fontFamily: theme.font.family }}>
-                  By signing in, you agree to our terms of service and privacy policy.
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Fade>
-      </Container>
-    </Box>
+            {/* Divider */}
+            <div className="divider text-[11px] uppercase tracking-wider text-base-content/40 my-3">
+              or continue with
+            </div>
+
+            {/* GitHub Button */}
+            <button
+              type="button"
+              onClick={() => handleOAuthLogin('github')}
+              className="btn btn-outline border-base-300 hover:bg-base-200 hover:border-base-300 hover:text-base-content btn-sm w-full rounded-xl text-xs font-medium flex items-center justify-center gap-2.5 transition-colors"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              <span>Sign in with GitHub</span>
+            </button>
+
+            {/* Google Button */}
+            <button
+              type="button"
+              onClick={() => handleOAuthLogin('google')}
+              className="btn btn-outline border-base-300 hover:bg-base-200 hover:border-base-300 hover:text-base-content btn-sm w-full rounded-xl text-xs font-medium flex items-center justify-center gap-2.5 transition-colors"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.97 0 12s.45 3.83 1.25 5.42l4.03-3.15z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                />
+              </svg>
+              <span>Sign in with Google</span>
+            </button>
+          </div>
+        )}
+
+        {/* Footer info */}
+        <div className="text-center mt-6 pt-5 border-t border-base-300/80">
+          <p className="text-xs text-base-content/60">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-primary font-semibold hover:underline">
+              Sign up here
+            </Link>
+          </p>
+          <p className="text-[11px] text-base-content/40 mt-3 leading-relaxed">
+            By signing in, you agree to our terms of service and privacy policy.
+          </p>
+        </div>
+      </div>
+
+      {/* Return to home link */}
+      <div className="mt-4">
+        <Link
+          to="/landing_page"
+          className="text-xs text-base-content/50 hover:text-base-content transition-colors inline-flex items-center gap-1"
+        >
+          ← Back to OmniNet overview
+        </Link>
+      </div>
+    </main>
   );
 };
 

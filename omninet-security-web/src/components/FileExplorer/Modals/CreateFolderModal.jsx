@@ -68,16 +68,16 @@ const CreateFolderModal = ({ onConfirm, onCancel }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50" onClick={onCancel}>
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Create New Folder</h3>
+    <div className="fixed inset-0 bg-neutral/40 backdrop-blur-xs flex items-center justify-center z-50 p-4" onClick={onCancel}>
+      <div className="bg-base-100 border border-base-300 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-scaleIn" onClick={(e) => e.stopPropagation()}>
+        <div className="px-5 py-4 border-b border-base-300">
+          <h3 className="text-base font-semibold text-base-content">Create New Folder</h3>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
-          <div className="px-6 py-4">
-            <label htmlFor="folderName" className="block text-sm font-medium text-gray-700 mb-2">
-              Folder Name:
+          <div className="p-5 space-y-2">
+            <label htmlFor="folderName" className="block text-xs font-semibold uppercase tracking-wider text-base-content/70">
+              Folder Name
             </label>
             <input
               ref={inputRef}
@@ -86,31 +86,31 @@ const CreateFolderModal = ({ onConfirm, onCancel }) => {
               value={folderName}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="Enter folder name"
+              placeholder="e.g. Projects, Invoices..."
               maxLength={255}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                error ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
+              className={`input input-bordered w-full rounded-xl text-sm bg-base-100 border-base-300 focus:outline-primary ${
+                error ? 'input-error' : ''
               }`}
             />
             {error && (
-              <p className="mt-2 text-sm text-red-600">{error}</p>
+              <p className="text-xs text-error mt-1">{error}</p>
             )}
           </div>
-          
-          <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-            <button 
-              type="button" 
-              onClick={onCancel} 
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+
+          <div className="px-5 py-3.5 border-t border-base-300 bg-base-200/40 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="btn btn-ghost btn-sm rounded-xl text-xs font-medium"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={!folderName.trim() || !!error}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="btn btn-primary btn-sm rounded-xl text-xs font-semibold shadow-xs"
             >
-              Create
+              Create Folder
             </button>
           </div>
         </form>

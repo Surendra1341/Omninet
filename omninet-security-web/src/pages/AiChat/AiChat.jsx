@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  PlusIcon,
+  TrashIcon,
+  Bars3Icon,
+  PaperAirplaneIcon,
+  SparklesIcon,
+  ChatBubbleLeftRightIcon,
+} from "@heroicons/react/24/outline";
 import { useAiChat } from "../../hooks/useAiChat";
 
 const formatTime = (timestamp) =>
@@ -13,80 +21,60 @@ const Sidebar = ({ isOpen, sessions, currentSession, isLoading, actions }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col flex-shrink-0 transition-all duration-300">
-      <div className="p-4 border-b border-gray-200">
+    <div className="w-72 bg-base-100 border-r border-base-300 flex flex-col flex-shrink-0 transition-all duration-300">
+      <div className="p-3.5 border-b border-base-300">
         <button
+          type="button"
           onClick={() => actions.setShowNewSessionModal(true)}
-          className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2"
+          className="btn btn-primary btn-sm w-full gap-2 rounded-xl shadow-xs"
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          <span>New Chat</span>
+          <PlusIcon className="w-4 h-4" />
+          <span>New Session</span>
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {isLoading ? (
-          <div className="p-4 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-2 text-gray-500">Loading sessions...</p>
+          <div className="p-6 text-center">
+            <span className="loading loading-spinner loading-sm text-primary"></span>
+            <p className="mt-2 text-xs text-base-content/50">Loading sessions...</p>
           </div>
         ) : sessions.length === 0 ? (
-          <div className="p-4 text-center text-gray-500">
+          <div className="p-6 text-center text-xs text-base-content/50">
             <p>No chat sessions yet.</p>
-            <p className="text-sm">Create one to get started!</p>
+            <p className="mt-1">Create one to get started.</p>
           </div>
         ) : (
-          sessions.map((session) => (
-            <div
-              key={session.id}
-              onClick={() => actions.selectSession(session.id)}
-              className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors group ${
-                currentSession?.id === session.id
-                  ? "bg-blue-50 border-r-4 border-r-blue-500"
-                  : ""
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-800 truncate">
-                    {session.title}
+          sessions.map((session) => {
+            const isSelected = currentSession?.id === session.id;
+            return (
+              <div
+                key={session.id}
+                onClick={() => actions.selectSession(session.id)}
+                className={`p-3 rounded-xl cursor-pointer transition-colors group flex items-start justify-between ${
+                  isSelected
+                    ? "bg-primary/10 border-l-2 border-primary text-base-content"
+                    : "hover:bg-base-200 text-base-content/80 border-l-2 border-transparent"
+                }`}
+              >
+                <div className="flex-1 min-w-0 pr-2">
+                  <h3 className="text-xs font-semibold truncate">
+                    {session.title || "Untitled Chat"}
                   </h3>
-                  <p className="text-sm text-gray-500 truncate mt-1">
+                  <p className="text-[11px] text-base-content/50 truncate mt-0.5">
                     {new Date(session.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={(e) => actions.deleteSession(session.id, e)}
-                  className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-all p-1 rounded ml-2"
+                  className="opacity-0 group-hover:opacity-100 text-base-content/40 hover:text-error transition-all p-1 rounded-md"
+                  title="Delete session"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
+                  <TrashIcon className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
@@ -94,32 +82,23 @@ const Sidebar = ({ isOpen, sessions, currentSession, isLoading, actions }) => {
 };
 
 const ChatHeader = ({ currentSession, onMenuClick }) => (
-  <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-4 flex-shrink-0">
-    <button
-      onClick={onMenuClick}
-      className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-    >
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
+  <div className="bg-base-100/90 backdrop-blur-md border-b border-base-300 px-5 py-3.5 flex items-center justify-between flex-shrink-0">
+    <div className="flex items-center gap-3">
+      <button
+        type="button"
+        onClick={onMenuClick}
+        className="btn btn-ghost btn-xs btn-square text-base-content/70 hover:text-base-content"
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M4 6h16M4 12h16M4 18h16"
-        />
-      </svg>
-    </button>
-    <div className="flex-1">
-      <h1 className="text-xl font-semibold text-gray-800">
-        {currentSession ? currentSession.title : "AI Assistant"}
-      </h1>
-      <p className="text-sm text-gray-500">
-        {currentSession ? "Online" : "Select a session to start"}
-      </p>
+        <Bars3Icon className="w-5 h-5" />
+      </button>
+      <div>
+        <h1 className="text-sm font-semibold text-base-content">
+          {currentSession ? currentSession.title : "AI Assistant"}
+        </h1>
+        <p className="text-xs text-base-content/50">
+          {currentSession ? "Online" : "Select a session or create a new one"}
+        </p>
+      </div>
     </div>
   </div>
 );
@@ -130,27 +109,27 @@ const Message = ({ message }) => {
     role === "assistant" || role === "ai" || role === "bot" || role === "model";
   return (
     <div
-      className={`flex mb-4 ${isAssistant ? "justify-start" : "justify-end"}`}
+      className={`flex mb-3 ${isAssistant ? "justify-start" : "justify-end"}`}
     >
       <div
-        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm border ${
+        className={`max-w-xs sm:max-w-md lg:max-w-xl px-4 py-2.5 rounded-2xl shadow-2xs text-xs sm:text-sm ${
           isAssistant
-            ? "bg-gray-100 text-gray-800 rounded-bl-none"
-            : "bg-blue-500 text-white rounded-br-none"
+            ? "bg-base-100 text-base-content rounded-tl-xs border border-base-300"
+            : "bg-primary text-primary-content rounded-tr-xs"
         }`}
       >
         {isAssistant ? (
-          <div className="prose prose-sm max-w-none text-gray-800 prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-3 prose-pre:rounded-lg prose-code:before:content-[''] prose-code:after:content-['']">
+          <div className="prose prose-sm max-w-none text-base-content prose-pre:bg-base-300 prose-pre:text-base-content prose-pre:p-3 prose-pre:rounded-xl prose-code:before:content-[''] prose-code:after:content-['']">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {message.content || ""}
             </ReactMarkdown>
           </div>
         ) : (
-          <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+          <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
         )}
         <div
-          className={`text-xs mt-1 ${
-            isAssistant ? "text-gray-500 text-left" : "text-blue-100 text-right"
+          className={`text-[10px] mt-1 select-none ${
+            isAssistant ? "text-base-content/40 text-left" : "text-primary-content/70 text-right"
           }`}
         >
           {formatTime(message.createdAt)}
@@ -161,27 +140,17 @@ const Message = ({ message }) => {
 };
 
 const MessageArea = ({ messages, isLoading, messagesEndRef }) => (
-  <div className="flex-1 overflow-y-auto p-4 min-h-0 chat-bg-violet">
-    <div className="max-w-4xl mx-auto space-y-4">
+  <div className="flex-1 overflow-y-auto p-5 min-h-0 bg-base-200/30">
+    <div className="max-w-4xl mx-auto space-y-3">
       {messages.map((msg) => (
         <Message key={msg.id} message={msg} />
       ))}
       {isLoading && (
         <div className="flex justify-start">
-          <div className="bg-gray-100 border rounded-2xl rounded-bl-none px-4 py-2 shadow-sm">
+          <div className="bg-base-100 border border-base-300 rounded-2xl rounded-tl-xs px-4 py-2 shadow-2xs">
             <div className="flex items-center space-x-2">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.1s" }}
-                ></div>
-                <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                ></div>
-              </div>
-              <span className="text-sm text-gray-500">AI is typing...</span>
+              <span className="loading loading-dots loading-xs text-primary"></span>
+              <span className="text-xs text-base-content/50">Assistant is thinking...</span>
             </div>
           </div>
         </div>
@@ -192,27 +161,24 @@ const MessageArea = ({ messages, isLoading, messagesEndRef }) => (
 );
 
 const WelcomeScreen = ({ onStartNewChat }) => (
-  <div className="flex-1 flex items-center justify-center h-full p-4 chat-bg-violet">
-    <div className="text-center">
-      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 p-1">
-        <img
-          src="/ordAI.gif"
-          alt="AI Assistant"
-          className="w-full h-full object-cover rounded-full select-none pointer-events-none"
-          draggable={false}
-        />
+  <div className="flex-1 flex items-center justify-center h-full p-6 bg-base-200/30">
+    <div className="text-center max-w-sm">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
+        <SparklesIcon className="w-8 h-8" />
       </div>
-      <h2 className="text-xl font-semibold text-gray-700 mb-2">
-        Welcome to AI Assistant
+      <h2 className="text-base font-semibold text-base-content mb-1">
+        Contextual AI Assistant
       </h2>
-      <p className="text-gray-500 mb-6">
-        Create a new chat session to start your conversation.
+      <p className="text-xs text-base-content/60 mb-5 leading-relaxed">
+        Start a conversation to draft content, summarize your notes, organize tasks, and explore ideas cleanly.
       </p>
       <button
+        type="button"
         onClick={onStartNewChat}
-        className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
+        className="btn btn-primary btn-sm rounded-xl gap-2 shadow-xs"
       >
-        Start New Chat
+        <PlusIcon className="w-4 h-4" />
+        <span>Start New Chat</span>
       </button>
     </div>
   </div>
@@ -220,19 +186,17 @@ const WelcomeScreen = ({ onStartNewChat }) => (
 
 const ChatInput = ({ value, setValue, onSendMessage, isLoading, inputRef }) => {
   const handleSend = () => {
+    if (!value.trim() || isLoading) return;
     onSendMessage(value);
     setValue("");
-    // Keep the typing flow smooth by refocusing the input after send
     inputRef?.current?.focus();
   };
 
-  // Enter handling will be done via form onSubmit to ensure consistency
-
   return (
-    <div className="p-4 bg-white border-t border-gray-200 flex-shrink-0">
+    <div className="p-4 bg-base-100 border-t border-base-300 flex-shrink-0">
       <div className="max-w-4xl mx-auto">
         <form
-          className="flex items-center space-x-3 bg-gray-100 rounded-full px-4 py-2"
+          className="flex items-center gap-2 bg-base-200/70 border border-base-300 rounded-2xl px-3 py-1.5 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all"
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
@@ -243,30 +207,20 @@ const ChatInput = ({ value, setValue, onSendMessage, isLoading, inputRef }) => {
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder-gray-500"
+            placeholder="Type your message... (Enter to send)"
+            className="flex-1 bg-transparent border-none outline-none text-xs sm:text-sm text-base-content placeholder:text-base-content/40 py-1"
             disabled={isLoading}
             autoFocus
           />
           <button
             type="submit"
-            onClick={handleSend}
             disabled={!value.trim() || isLoading}
-            className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className={`btn btn-primary btn-sm btn-square rounded-xl shadow-xs transition-all ${
+              !value.trim() || isLoading ? "btn-disabled opacity-40" : ""
+            }`}
+            title="Send message"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-              />
-            </svg>
+            <PaperAirplaneIcon className="w-4 h-4" />
           </button>
         </form>
       </div>
@@ -288,9 +242,9 @@ const NewSessionModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center p-4 z-50">
-      <div className="bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl p-6 w-full max-w-md border border-white/20">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div className="bg-base-100 rounded-2xl shadow-2xl p-6 w-full max-w-md border border-base-300">
+        <h3 className="text-sm font-semibold mb-3 text-base-content">
           Create New Chat Session
         </h3>
         <input
@@ -298,20 +252,22 @@ const NewSessionModal = ({
           value={newSessionName}
           onChange={(e) => setNewSessionName(e.target.value)}
           placeholder="Enter session name..."
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onKeyPress={(e) => e.key === "Enter" && handleCreate()}
+          className="input input-bordered input-sm w-full bg-base-100 border-base-300 rounded-xl text-base-content placeholder:text-base-content/40 mb-4 focus:border-primary"
+          onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           autoFocus
         />
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end gap-2">
           <button
+            type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="btn btn-ghost btn-sm text-base-content/70 rounded-xl"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleCreate}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="btn btn-primary btn-sm rounded-xl shadow-xs"
           >
             Create
           </button>
@@ -390,7 +346,7 @@ function AiChat() {
   }, [inputRef, inputValue, state.isLoading, actions]);
 
   return (
-    <div className="flex bg-gray-100 overflow-hidden w-full h-[calc(100dvh-72px)] md:h-[calc(100dvh-80px)]">
+    <div className="flex bg-base-100 overflow-hidden w-full h-[calc(100dvh-72px)] md:h-[calc(100dvh-80px)]">
       <Sidebar
         isOpen={state.isSidebarOpen}
         sessions={state.chatSessions}

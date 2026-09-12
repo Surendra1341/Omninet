@@ -103,16 +103,16 @@ function AddNoteModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-[60] p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-[60] p-4">
+            <div className="card bg-base-100 border border-base-300 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Note</h2>
+                    <div className="flex justify-between items-center mb-5">
+                        <h2 className="text-lg font-bold text-base-content tracking-tight">Add New Note</h2>
                         <button
                             onClick={handleClose}
-                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-base-content rounded-lg"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
@@ -121,7 +121,7 @@ function AddNoteModal({
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Title Field */}
                         <div>
-                            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label htmlFor="title" className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
                                 Title
                             </label>
                             <input
@@ -130,9 +130,7 @@ function AddNoteModal({
                                 name="title"
                                 value={newNote.title}
                                 onChange={handleInputChange}
-                                className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-3 focus:ring-green-600 focus:border-green-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${
-                                    newNote.title.trim() === '' ? 'border-gray-300' : 'border-green-600'
-                                }`}
+                                className="input input-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl focus:border-primary"
                                 placeholder="Enter note title"
                                 required
                             />
@@ -140,27 +138,27 @@ function AddNoteModal({
 
                         {/* Category Selection */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
                                 Category
                             </label>
                             <div className="relative" ref={categoryDropdownRef}>
                                 <button
                                     type="button"
                                     onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                                    className={`w-full px-3 py-2 text-left border-2 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-black dark:bg-gray-700 dark:border-gray-600 dark:text-white flex justify-between items-center ${newNote.category.name === 'Select Category' ? 'border-gray-300':'border-green-600'}`}
+                                    className="input input-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl flex justify-between items-center cursor-pointer focus:border-primary"
                                 >
-                                    <span className={newNote.category.id ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
+                                    <span className={newNote.category.id ? 'text-base-content' : 'text-base-content/40'}>
                                         {newNote.category.name}
                                     </span>
-                                    <svg className={`w-4 h-4 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className={`w-4 h-4 text-base-content/50 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
 
                                 {isCategoryDropdownOpen && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto transition-all duration-200">
-                                        {!categories ? (
-                                            <div className="text-center py-10 text-gray-500">
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-xl shadow-xl z-20 max-h-48 overflow-y-auto p-1.5">
+                                        {!categories || categories.length === 0 ? (
+                                            <div className="text-center py-4 text-xs text-base-content/40">
                                                 No categories found
                                             </div>
                                         ) : (
@@ -169,7 +167,7 @@ function AddNoteModal({
                                                     key={category.id}
                                                     type="button"
                                                     onClick={() => handleCategorySelect(category)}
-                                                    className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+                                                    className="w-full px-3 py-2 text-left rounded-lg text-xs hover:bg-base-200 text-base-content transition"
                                                 >
                                                     {category.name}
                                                 </button>
@@ -182,7 +180,7 @@ function AddNoteModal({
 
                         {/* Description Field */}
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label htmlFor="description" className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
                                 Description
                             </label>
                             <textarea
@@ -191,7 +189,7 @@ function AddNoteModal({
                                 value={newNote.description}
                                 onChange={handleInputChange}
                                 rows={4}
-                                className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 resize-none ${newNote.description.trim() === '' ? 'border-gray-300' : 'border-green-600'}`}
+                                className="textarea textarea-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl focus:border-primary resize-none"
                                 placeholder="Enter note description"
                                 required
                             />
@@ -199,41 +197,41 @@ function AddNoteModal({
 
                         {/* File Upload */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                File (Optional)
+                            <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
+                                Attachment (Optional)
                             </label>
                             <div className="space-y-2">
                                 <input
                                     type="file"
                                     ref={fileInputRef}
                                     onChange={handleFileChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-600 dark:file:text-gray-300"
+                                    className="file-input file-input-bordered file-input-sm w-full bg-base-200/50 text-base-content rounded-xl"
                                     accept="*/*"
                                 />
                                 
                                 {/* File Preview */}
                                 {filePreview && (
-                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                                    <div className="bg-base-200/40 rounded-xl p-3 border border-base-300">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-3">
+                                            <div className="flex items-center space-x-3 min-w-0">
                                                 {filePreview.type === 'image' ? (
                                                     <img 
                                                         src={filePreview.url} 
                                                         alt="Preview" 
-                                                        className="w-10 h-10 object-cover rounded"
+                                                        className="w-10 h-10 object-cover rounded-lg shrink-0"
                                                     />
                                                 ) : (
-                                                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
-                                                        <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <div className="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center shrink-0">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                         </svg>
                                                     </div>
                                                 )}
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-medium text-base-content truncate">
                                                         {filePreview.name}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                    <p className="text-[11px] text-base-content/50">
                                                         {formatFileSize(filePreview.size)}
                                                     </p>
                                                 </div>
@@ -241,7 +239,7 @@ function AddNoteModal({
                                             <button
                                                 type="button"
                                                 onClick={handleRemoveFile}
-                                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                                className="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10 rounded-lg shrink-0"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -254,26 +252,23 @@ function AddNoteModal({
                         </div>
 
                         {/* Form Actions */}
-                        <div className="flex justify-end space-x-3 pt-4">
+                        <div className="flex justify-end gap-2 pt-3">
                             <button
                                 type="button"
                                 onClick={handleClose}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+                                className="btn btn-ghost btn-sm rounded-xl font-medium"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                className="btn btn-primary btn-sm rounded-xl font-medium"
                             >
                                 {isSubmitting ? (
                                     <>
-                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Creating...
+                                        <span className="loading loading-spinner loading-xs" />
+                                        <span>Creating...</span>
                                     </>
                                 ) : (
                                     'Create Note'

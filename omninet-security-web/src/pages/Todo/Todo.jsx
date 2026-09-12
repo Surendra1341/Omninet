@@ -1,24 +1,22 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { todoAPI } from '../../services/api';
 import toast, { Toaster } from 'react-hot-toast';
-import AddIcon from '@mui/icons-material/Add';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import FlagIcon from '@mui/icons-material/Flag';
-import RepeatIcon from '@mui/icons-material/Repeat';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import SearchIcon from '@mui/icons-material/Search';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import TuneIcon from '@mui/icons-material/Tune';
+import {
+  PlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  CheckCircleIcon,
+  FlagIcon,
+  ArrowPathIcon,
+  CalendarDaysIcon,
+  MagnifyingGlassIcon,
+  ListBulletIcon,
+  ViewColumnsIcon,
+  ChartBarIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  CheckIcon
+} from '@heroicons/react/24/outline';
 
 import TodoModal from '../../components/Todo/TodoModal';
 import TodoKanbanView from '../../components/Todo/TodoKanbanView';
@@ -26,10 +24,10 @@ import TodoCalendarView from '../../components/Todo/TodoCalendarView';
 import TodoAnalytics from '../../components/Todo/TodoAnalytics';
 
 const PRIORITY_CONFIG = {
-  URGENT: { label: 'Urgent', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800/60', dot: 'bg-red-500' },
-  HIGH: { label: 'High', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800/60', dot: 'bg-orange-500' },
-  MEDIUM: { label: 'Medium', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/60', dot: 'bg-blue-500' },
-  LOW: { label: 'Low', color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700', dot: 'bg-slate-400' }
+  URGENT: { label: 'Urgent', badge: 'badge-error text-white' },
+  HIGH: { label: 'High', badge: 'badge-warning' },
+  MEDIUM: { label: 'Medium', badge: 'badge-info' },
+  LOW: { label: 'Low', badge: 'badge-ghost' }
 };
 
 function Todo() {
@@ -476,74 +474,72 @@ function Todo() {
     return (
       <div
         key={todo.id}
-        className={`group bg-white dark:bg-gray-800 border rounded-2xl p-4 transition-all duration-200 shadow-2xs hover:shadow-md ${
-          isCompleted
-            ? 'border-gray-100 dark:border-gray-800/80 bg-gray-50/50 dark:bg-gray-800/50 opacity-70'
-            : 'border-gray-200/90 dark:border-gray-700/80 hover:border-blue-300 dark:hover:border-blue-500/50'
+        className={`card bg-base-100 border border-base-300 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all group ${
+          isCompleted ? 'opacity-60 bg-base-200/30' : 'hover:border-primary/40'
         }`}
       >
         <div className="flex items-start justify-between gap-3">
           {/* Checkbox & Task details */}
-          <div className="flex items-start gap-3.5 min-w-0 flex-1">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
             <button
               type="button"
               onClick={() => handleToggleStatus(todo)}
-              className="mt-0.5 text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors shrink-0 cursor-pointer"
+              className="mt-0.5 text-base-content/40 hover:text-primary transition-colors shrink-0"
               title={isCompleted ? 'Mark incomplete' : 'Mark completed'}
             >
               {isCompleted ? (
-                <CheckCircleIcon className="text-emerald-500 dark:text-emerald-400" style={{ fontSize: '1.45rem' }} />
+                <CheckCircleIcon className="w-5 h-5 text-success stroke-2" />
               ) : (
-                <RadioButtonUncheckedIcon style={{ fontSize: '1.45rem' }} />
+                <span className="w-5 h-5 rounded-full border-2 border-base-content/30 inline-block hover:border-primary transition-colors" />
               )}
             </button>
 
             <div className="min-w-0 flex-1">
               {/* Title & Strikethrough */}
-              <h3 className={`text-sm font-semibold tracking-tight text-gray-900 dark:text-white break-words ${
-                isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''
+              <h3 className={`text-sm font-semibold tracking-tight text-base-content break-words ${
+                isCompleted ? 'line-through text-base-content/40' : ''
               }`}>
                 {todo.title}
               </h3>
 
               {/* Description preview */}
               {todo.description && (
-                <p className={`text-xs mt-1 text-gray-500 dark:text-gray-400 line-clamp-2 ${isCompleted ? 'line-through opacity-70' : ''}`}>
+                <p className={`text-xs mt-1 text-base-content/60 line-clamp-2 ${isCompleted ? 'line-through opacity-70' : ''}`}>
                   {todo.description}
                 </p>
               )}
 
               {/* Metadata Badges Row */}
-              <div className="flex items-center gap-2 flex-wrap mt-2.5">
+              <div className="flex items-center gap-1.5 flex-wrap mt-2.5">
                 {/* Priority */}
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border ${priority.bg} ${priority.color}`}>
-                  <FlagIcon style={{ fontSize: '0.75rem' }} />
+                <span className={`badge badge-sm ${priority.badge} gap-1 font-medium`}>
+                  <FlagIcon className="w-3 h-3 stroke-2" />
                   <span>{priority.label}</span>
                 </span>
 
                 {/* Due Date */}
                 {dateInfo && (
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border ${
+                  <span className={`badge badge-sm font-medium gap-1 ${
                     isCompleted
-                      ? 'border-gray-200 dark:border-gray-700 text-gray-400'
+                      ? 'badge-ghost text-base-content/40'
                       : dateInfo.isPast
-                      ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'
+                      ? 'badge-error text-white'
                       : dateInfo.isToday
-                      ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-                      : 'bg-gray-50 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                      ? 'badge-primary text-white'
+                      : 'badge-neutral'
                   }`}>
-                    <CalendarMonthIcon style={{ fontSize: '0.8rem' }} />
+                    <CalendarDaysIcon className="w-3 h-3" />
                     <span>{dateInfo.label}</span>
                     {dateInfo.isPast && !isCompleted && (
-                      <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider ml-0.5">Overdue</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider ml-0.5">Overdue</span>
                     )}
                   </span>
                 )}
 
                 {/* Recurring indicator */}
                 {todo.isRecurring && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                    <RepeatIcon style={{ fontSize: '0.8rem' }} />
+                  <span className="badge badge-sm badge-neutral gap-1 font-medium">
+                    <ArrowPathIcon className="w-3 h-3" />
                     <span className="capitalize">{todo.recurrencePattern?.toLowerCase()}</span>
                   </span>
                 )}
@@ -552,7 +548,7 @@ function Todo() {
                 {todo.tags && todo.tags.map(tag => (
                   <span
                     key={tag}
-                    className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                    className="badge badge-sm badge-ghost font-medium"
                   >
                     #{tag}
                   </span>
@@ -563,19 +559,19 @@ function Todo() {
                   <button
                     type="button"
                     onClick={() => toggleChecklistExpand(todo.id)}
-                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/60 hover:bg-blue-100 transition cursor-pointer"
+                    className="badge badge-sm badge-outline gap-1 font-medium hover:border-primary cursor-pointer transition"
                   >
                     <span>Checklist ({completedSubtasks}/{subtasks.length})</span>
-                    {isExpanded ? <ExpandLessIcon style={{ fontSize: '0.9rem' }} /> : <ExpandMoreIcon style={{ fontSize: '0.9rem' }} />}
+                    {isExpanded ? <ChevronUpIcon className="w-3 h-3" /> : <ChevronDownIcon className="w-3 h-3" />}
                   </button>
                 )}
               </div>
 
               {/* Subtasks Progress Bar if has subtasks */}
               {subtasks.length > 0 && (
-                <div className="w-full max-w-xs bg-gray-100 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden mt-2">
+                <div className="w-full max-w-xs bg-base-200 h-1.5 rounded-full overflow-hidden mt-2.5">
                   <div
-                    className="bg-blue-600 h-full rounded-full transition-all duration-300"
+                    className="bg-primary h-full rounded-full transition-all duration-300"
                     style={{ width: `${Math.round((completedSubtasks / subtasks.length) * 100)}%` }}
                   />
                 </div>
@@ -583,43 +579,43 @@ function Todo() {
             </div>
           </div>
 
-          {/* Action buttons (always clean and accessible) */}
-          <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+          {/* Action buttons */}
+          <div className="flex items-center gap-0.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
             <button
               type="button"
               onClick={() => openEditModal(todo)}
-              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition cursor-pointer"
+              className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-primary rounded-lg"
               title="Edit Task"
             >
-              <EditOutlinedIcon style={{ fontSize: '1.15rem' }} />
+              <PencilSquareIcon className="w-3.5 h-3.5" />
             </button>
 
             <button
               type="button"
               onClick={() => handleDelete(todo.id)}
-              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition cursor-pointer"
+              className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-error rounded-lg"
               title="Delete Task"
             >
-              <DeleteOutlineIcon style={{ fontSize: '1.15rem' }} />
+              <TrashIcon className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
         {/* Expandable Checklist Sub-Items */}
         {isExpanded && subtasks.length > 0 && (
-          <div className="mt-3.5 pt-3 border-t border-gray-100 dark:border-gray-700/80 space-y-2 pl-9">
+          <div className="mt-3.5 pt-3 border-t border-base-200 space-y-2 pl-8">
             {subtasks.map(subtask => (
               <div
                 key={subtask.id}
                 onClick={() => handleToggleSubtask(todo.id, subtask.id)}
-                className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer hover:text-blue-600 transition select-none"
+                className="flex items-center gap-2 text-xs text-base-content/80 cursor-pointer hover:text-primary transition select-none"
               >
-                {subtask.isCompleted ? (
-                  <CheckBoxIcon style={{ fontSize: '1.1rem' }} className="text-blue-600" />
-                ) : (
-                  <CheckBoxOutlineBlankIcon style={{ fontSize: '1.1rem' }} className="text-gray-400" />
-                )}
-                <span className={subtask.isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}>
+                <div className={`w-4 h-4 rounded flex items-center justify-center border transition ${
+                  subtask.isCompleted ? 'bg-primary border-primary text-primary-content' : 'border-base-content/30'
+                }`}>
+                  {subtask.isCompleted && <CheckIcon className="w-3 h-3 stroke-2" />}
+                </div>
+                <span className={subtask.isCompleted ? 'line-through text-base-content/40' : ''}>
                   {subtask.title}
                 </span>
               </div>
@@ -635,73 +631,73 @@ function Todo() {
       <Toaster position="top-right" />
 
       {/* Top Header: Title, Counts & Mode Switcher */}
-      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700 pb-5">
+      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-base-300 pb-5">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-bold tracking-tight text-base-content">
               Tasks
             </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+            <span className="badge badge-sm badge-neutral font-medium">
               {counts.total} active
             </span>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-base-content/60 mt-1">
             Organize, prioritize, and conquer your goals
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Segmented View Mode Tabs */}
-          <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div className="join bg-base-200 p-0.5 rounded-xl border border-base-300">
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+              className={`btn btn-xs join-item font-medium gap-1 rounded-lg ${
                 viewMode === 'list'
-                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-2xs'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'btn-primary'
+                  : 'btn-ghost text-base-content/70'
               }`}
             >
-              <FormatListBulletedIcon style={{ fontSize: '1rem' }} />
+              <ListBulletIcon className="w-3.5 h-3.5" />
               <span>List</span>
             </button>
 
             <button
               type="button"
               onClick={() => setViewMode('board')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+              className={`btn btn-xs join-item font-medium gap-1 rounded-lg ${
                 viewMode === 'board'
-                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-2xs'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'btn-primary'
+                  : 'btn-ghost text-base-content/70'
               }`}
             >
-              <ViewKanbanIcon style={{ fontSize: '1rem' }} />
+              <ViewColumnsIcon className="w-3.5 h-3.5" />
               <span>Board</span>
             </button>
 
             <button
               type="button"
               onClick={() => setViewMode('calendar')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+              className={`btn btn-xs join-item font-medium gap-1 rounded-lg ${
                 viewMode === 'calendar'
-                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-2xs'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'btn-primary'
+                  : 'btn-ghost text-base-content/70'
               }`}
             >
-              <CalendarMonthIcon style={{ fontSize: '1rem' }} />
+              <CalendarDaysIcon className="w-3.5 h-3.5" />
               <span>Calendar</span>
             </button>
 
             <button
               type="button"
               onClick={() => setViewMode('analytics')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+              className={`btn btn-xs join-item font-medium gap-1 rounded-lg ${
                 viewMode === 'analytics'
-                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-2xs'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'btn-primary'
+                  : 'btn-ghost text-base-content/70'
               }`}
             >
-              <TrendingUpIcon style={{ fontSize: '1rem' }} />
+              <ChartBarIcon className="w-3.5 h-3.5" />
               <span>Analytics</span>
             </button>
           </div>
@@ -710,9 +706,9 @@ function Todo() {
           <button
             type="button"
             onClick={() => openCreateModal()}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow-sm transition cursor-pointer"
+            className="btn btn-primary btn-sm rounded-xl font-medium gap-1.5 text-xs"
           >
-            <AddIcon style={{ fontSize: '1.1rem' }} />
+            <PlusIcon className="w-4 h-4 stroke-2" />
             <span>New Task</span>
           </button>
         </div>
@@ -722,10 +718,10 @@ function Todo() {
       {viewMode !== 'analytics' && (
         <form
           onSubmit={handleQuickAdd}
-          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/90 rounded-2xl p-2.5 shadow-2xs flex items-center gap-2 flex-wrap"
+          className="card bg-base-100 border border-base-300 rounded-2xl p-2 shadow-xs flex flex-row items-center gap-2 flex-wrap"
         >
-          <div className="p-2 text-gray-400">
-            <RadioButtonUncheckedIcon style={{ fontSize: '1.3rem' }} />
+          <div className="pl-2 text-base-content/40">
+            <span className="w-4 h-4 rounded-full border-2 border-base-content/30 inline-block" />
           </div>
 
           <input
@@ -733,7 +729,7 @@ function Todo() {
             placeholder="Add a task (e.g., Update system documentation) and press Enter..."
             value={quickTitle}
             onChange={(e) => setQuickTitle(e.target.value)}
-            className="flex-1 min-w-[200px] px-2 py-1.5 text-sm bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-400"
+            className="input input-ghost input-sm flex-1 min-w-[200px] text-sm text-base-content placeholder:text-base-content/40 focus:bg-transparent focus:outline-none"
           />
 
           {/* Date Selector Shortcuts */}
@@ -741,25 +737,25 @@ function Todo() {
             <button
               type="button"
               onClick={() => setQuickDateOption(prev => prev === 'today' ? 'none' : 'today')}
-              className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition cursor-pointer ${
+              className={`btn btn-xs rounded-lg font-medium ${
                 quickDateOption === 'today'
-                  ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-                  : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100'
+                  ? 'btn-primary'
+                  : 'btn-ghost text-base-content/70'
               }`}
             >
-              📅 Today
+              Today
             </button>
 
             <button
               type="button"
               onClick={() => setQuickDateOption(prev => prev === 'tomorrow' ? 'none' : 'tomorrow')}
-              className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition cursor-pointer ${
+              className={`btn btn-xs rounded-lg font-medium ${
                 quickDateOption === 'tomorrow'
-                  ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-                  : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100'
+                  ? 'btn-primary'
+                  : 'btn-ghost text-base-content/70'
               }`}
             >
-              ⏳ Tomorrow
+              Tomorrow
             </button>
           </div>
 
@@ -767,19 +763,19 @@ function Todo() {
           <select
             value={quickPriority}
             onChange={(e) => setQuickPriority(e.target.value)}
-            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 outline-none cursor-pointer"
+            className="select select-bordered select-xs rounded-lg bg-base-200/50 text-base-content font-medium"
           >
-            <option value="URGENT">🔴 Urgent</option>
-            <option value="HIGH">🟠 High</option>
-            <option value="MEDIUM">🔵 Medium</option>
-            <option value="LOW">⚪ Low</option>
+            <option value="URGENT">Urgent</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
           </select>
 
           {/* Submit Button */}
           <button
             type="submit"
             disabled={isQuickSubmitting || !quickTitle.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold transition active:scale-95 cursor-pointer shadow-2xs"
+            className="btn btn-primary btn-xs rounded-lg font-medium"
           >
             {isQuickSubmitting ? 'Adding...' : 'Add'}
           </button>
@@ -787,7 +783,7 @@ function Todo() {
           <button
             type="button"
             onClick={() => openCreateModal()}
-            className="text-xs text-gray-400 hover:text-blue-600 px-2 font-medium"
+            className="btn btn-ghost btn-xs text-base-content/50 hover:text-base-content"
             title="Open detailed task creator"
           >
             More details
@@ -802,27 +798,25 @@ function Todo() {
           <div className="flex items-center gap-1.5 flex-wrap">
             {[
               { id: 'all', label: 'All Tasks', count: counts.total },
-              { id: 'today', label: '📅 Today', count: counts.today },
-              { id: 'upcoming', label: '⏳ Upcoming', count: counts.upcoming },
-              { id: 'overdue', label: '🚨 Overdue', count: counts.overdue, isAlert: counts.overdue > 0 },
-              { id: 'completed', label: '✅ Completed', count: counts.completed }
+              { id: 'today', label: 'Today', count: counts.today },
+              { id: 'upcoming', label: 'Upcoming', count: counts.upcoming },
+              { id: 'overdue', label: 'Overdue', count: counts.overdue, isAlert: counts.overdue > 0 },
+              { id: 'completed', label: 'Completed', count: counts.completed }
             ].map(tab => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                className={`btn btn-xs rounded-xl font-medium gap-1.5 ${
                   activeTab === tab.id
-                    ? 'bg-blue-600 text-white shadow-2xs'
+                    ? 'btn-primary'
                     : tab.isAlert
-                    ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    ? 'btn-error btn-outline'
+                    : 'btn-ghost bg-base-200/60 text-base-content/70'
                 }`}
               >
                 <span>{tab.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  activeTab === tab.id ? 'bg-white/25 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                }`}>
+                <span className={`badge badge-xs ${activeTab === tab.id ? 'badge-neutral bg-white/20 text-white' : 'badge-ghost'}`}>
                   {tab.count}
                 </span>
               </button>
@@ -835,13 +829,13 @@ function Todo() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 outline-none"
+              className="select select-bordered select-xs rounded-xl bg-base-100 border-base-300 text-base-content font-medium"
             >
               <option value="all">All Priorities</option>
-              <option value="URGENT">🔴 Urgent only</option>
-              <option value="HIGH">🟠 High only</option>
-              <option value="MEDIUM">🔵 Medium only</option>
-              <option value="LOW">⚪ Low only</option>
+              <option value="URGENT">Urgent only</option>
+              <option value="HIGH">High only</option>
+              <option value="MEDIUM">Medium only</option>
+              <option value="LOW">Low only</option>
             </select>
 
             {/* Tag Filter */}
@@ -849,7 +843,7 @@ function Todo() {
               <select
                 value={selectedTag}
                 onChange={(e) => setSelectedTag(e.target.value)}
-                className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 outline-none"
+                className="select select-bordered select-xs rounded-xl bg-base-100 border-base-300 text-base-content font-medium"
               >
                 <option value="all">All Tags</option>
                 {allTags.map(t => (
@@ -860,13 +854,13 @@ function Todo() {
 
             {/* Search Input */}
             <div className="relative min-w-[180px]">
-              <SearchIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <MagnifyingGlassIcon className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
               <input
                 type="text"
                 placeholder="Search tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-blue-500"
+                className="input input-bordered input-xs rounded-xl bg-base-100 border-base-300 pl-8 w-full text-base-content"
               />
             </div>
           </div>
@@ -875,20 +869,20 @@ function Todo() {
 
       {/* Main View Content */}
       {loading ? (
-        <div className="text-center py-20">
-          <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-3 text-sm text-gray-500">Loading tasks...</p>
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <span className="loading loading-spinner loading-md text-primary" />
+          <p className="text-sm text-base-content/50">Loading tasks...</p>
         </div>
       ) : viewMode === 'list' ? (
         /* UNIFIED LIST VIEW */
         <div className="space-y-3">
           {sortedTodos.length === 0 ? (
-            <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-8 shadow-xs">
-              <CheckCircleIcon className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+            <div className="text-center py-16 bg-base-100 rounded-2xl border border-base-300 p-8 shadow-xs">
+              <CheckCircleIcon className="w-12 h-12 mx-auto text-base-content/30 mb-2" />
+              <h3 className="text-sm font-semibold text-base-content">
                 {activeTab === 'completed' ? 'No completed tasks yet' : 'All clear!'}
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-base-content/50 mt-1">
                 {activeTab === 'completed'
                   ? 'Tasks you check off will appear here.'
                   : 'No tasks found matching your filter. Use the bar above to add a new task.'}
@@ -897,7 +891,7 @@ function Todo() {
                 <button
                   type="button"
                   onClick={() => { setActiveTab('all'); setPriorityFilter('all'); setSelectedTag('all'); setSearchQuery(''); }}
-                  className="mt-3 inline-flex items-center text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
+                  className="mt-3 btn btn-ghost btn-xs text-primary"
                 >
                   View All Tasks
                 </button>

@@ -9,7 +9,18 @@ import NotesGrid from '../../components/Notes/NotesGrid';
 import Category from '../Category/Category';
 import storageClient from '../../services/storageClient';
 import toast, { Toaster } from 'react-hot-toast';
-import { DocumentTextIcon, TagIcon, TrashIcon, Squares2X2Icon, Bars3Icon } from '@heroicons/react/24/outline';
+import {
+    DocumentTextIcon,
+    TagIcon,
+    TrashIcon,
+    Squares2X2Icon,
+    Bars3Icon,
+    BookmarkIcon,
+    StarIcon,
+    PlusIcon,
+    MagnifyingGlassIcon,
+    XMarkIcon,
+} from '@heroicons/react/24/outline';
 
 function Notes() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -646,161 +657,153 @@ function Notes() {
     };
 
     return (
-        <div className="relative min-h-screen dark:bg-stone-400">
+        <div className="min-h-[calc(100vh-4rem)] bg-base-200 text-base-content py-6">
             {/* Toast Container */}
-            <Toaster 
-                position="top-right"
-                reverseOrder={false}
-                gutter={8}
-                toastOptions={{
-                    duration: 3000,
-                    style: {
-                        background: '#363636',
-                        color: '#fff',
-                    },
-                    success: {
-                        duration: 3000,
-                        style: {
-                            background: '#10B981',
-                            color: '#fff',
-                        },
-                        iconTheme: {
-                            primary: '#fff',
-                            secondary: '#10B981',
-                        },
-                    },
-                    error: {
-                        duration: 4000,
-                        style: {
-                            background: '#EF4444',
-                            color: '#fff',
-                        },
-                        iconTheme: {
-                            primary: '#fff',
-                            secondary: '#EF4444',
-                        },
-                    },
-                }}
-            />
-            
-            {/* Top Sub-Navigation Tabs for Notes Section */}
-            <div className="max-w-7xl mx-auto px-4 pt-4 pb-2">
-                <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3 flex-wrap gap-3">
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <Toaster position="top-right" />
+
+            {/* Top Header: Title, Segmented Tabs & Actions */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6">
+                <div className="flex items-center justify-between border-b border-base-300 pb-5 flex-wrap gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-base-content">
                             {currentView === 'categories' ? 'Note Categories' : currentView === 'recycled' ? 'Recycle Bin' : 'Notes'}
                         </h1>
+                        <p className="text-xs text-base-content/60 mt-1">
+                            {currentView === 'categories' 
+                                ? 'Organize and structure your notes into workspaces' 
+                                : currentView === 'recycled' 
+                                ? 'View and restore previously discarded notes' 
+                                : 'Capture knowledge, ideas, and documentation seamlessly'}
+                        </p>
                     </div>
-                    <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setCurrentView('notes');
-                                setSearchParams({});
-                                fetchCategories();
-                                fetchAndFilterNotes(selectedCategory, 0, pagination.pageSize);
-                            }}
-                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                currentView === 'notes' || currentView === 'search'
-                                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                            }`}
-                        >
-                            <DocumentTextIcon className="w-4 h-4" />
-                            <span>All Notes</span>
-                        </button>
 
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setCurrentView('categories');
-                                setSearchParams({ tab: 'categories' });
-                            }}
-                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                currentView === 'categories'
-                                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                            }`}
-                        >
-                            <TagIcon className="w-4 h-4" />
-                            <span>Categories</span>
-                        </button>
+                    <div className="flex items-center gap-3 flex-wrap">
+                        {/* Segmented View Switcher */}
+                        <div className="join bg-base-100 border border-base-300 rounded-xl p-0.5 shadow-2xs">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setCurrentView('notes');
+                                    setSearchParams({});
+                                    fetchCategories();
+                                    fetchAndFilterNotes(selectedCategory, 0, pagination.pageSize);
+                                }}
+                                className={`btn btn-xs join-item border-0 text-xs font-medium gap-1.5 px-3 ${
+                                    currentView === 'notes' || currentView === 'search'
+                                        ? 'bg-base-200 text-primary font-semibold shadow-2xs'
+                                        : 'btn-ghost text-base-content/65 hover:text-base-content'
+                                }`}
+                            >
+                                <DocumentTextIcon className="w-3.5 h-3.5" />
+                                <span>All Notes</span>
+                            </button>
 
-                        <button
-                            type="button"
-                            onClick={() => {
-                                handleRecycleBin();
-                                setSearchParams({ tab: 'recycled' });
-                            }}
-                            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                currentView === 'recycled'
-                                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                            }`}
-                        >
-                            <TrashIcon className="w-4 h-4" />
-                            <span>Recycle Bin</span>
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setCurrentView('categories');
+                                    setSearchParams({ tab: 'categories' });
+                                }}
+                                className={`btn btn-xs join-item border-0 text-xs font-medium gap-1.5 px-3 ${
+                                    currentView === 'categories'
+                                        ? 'bg-base-200 text-primary font-semibold shadow-2xs'
+                                        : 'btn-ghost text-base-content/65 hover:text-base-content'
+                                }`}
+                            >
+                                <TagIcon className="w-3.5 h-3.5" />
+                                <span>Categories</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    handleRecycleBin();
+                                    setSearchParams({ tab: 'recycled' });
+                                }}
+                                className={`btn btn-xs join-item border-0 text-xs font-medium gap-1.5 px-3 ${
+                                    currentView === 'recycled'
+                                        ? 'bg-base-200 text-primary font-semibold shadow-2xs'
+                                        : 'btn-ghost text-base-content/65 hover:text-base-content'
+                                }`}
+                            >
+                                <TrashIcon className="w-3.5 h-3.5" />
+                                <span>Recycle Bin</span>
+                            </button>
+                        </div>
+
+                        {/* Top New Note Action */}
+                        {currentView !== 'categories' && currentView !== 'recycled' && (
+                            <button
+                                type="button"
+                                onClick={handleAddNote}
+                                className="btn btn-primary btn-sm rounded-xl text-xs font-semibold gap-1.5 shadow-xs"
+                            >
+                                <PlusIcon className="w-4 h-4" />
+                                <span>New Note</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
             {currentView === 'categories' ? (
-                <div className="max-w-7xl mx-auto px-4 py-2">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <Category />
                 </div>
             ) : (
                 <>
-                    <form className="p-3 mx-auto" onSubmit={handleSearch}>
-                        <div className="flex flex-row justify-center">
-                            <CategoryDropdown
-                                categories={categories}
-                                loading={loading}
-                                selectedCategory={selectedCategory}
-                                onCategorySelect={selectCategory}
-                                isOpen={isDropdownOpen}
-                                onToggle={() => {
-                                    toggleDropdown();
-                                    if (isSearching) {
-                                        handleClearSearch();
-                                    } else {
-                                        setCurrentView('notes');
-                                    }
-                                }}
-                            />
-                            <div className="relative w-100">
-                                <input 
-                                    type="search" 
-                                    id="search-dropdown" 
-                                    className="block py-2.5 pl-8 md:pl-4 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500" 
-                                    placeholder="Search Notes.." 
-                                    value={searchQuery}
-                                    onChange={handleSearchInputChange}
+                    {/* Centered Search Bar */}
+                    <form className="max-w-7xl mx-auto px-4 sm:px-6 mb-4" onSubmit={handleSearch}>
+                        <div className="flex justify-center">
+                            <div className="join w-full max-w-2xl bg-base-100 border border-base-300 rounded-2xl shadow-xs overflow-hidden transition-all focus-within:border-primary/60">
+                                <CategoryDropdown
+                                    categories={categories}
+                                    loading={loading}
+                                    selectedCategory={selectedCategory}
+                                    onCategorySelect={selectCategory}
+                                    isOpen={isDropdownOpen}
+                                    onToggle={() => {
+                                        toggleDropdown();
+                                        if (isSearching) {
+                                            handleClearSearch();
+                                        } else {
+                                            setCurrentView('notes');
+                                        }
+                                    }}
                                 />
-                                {isSearching && searchQuery && (
-                                    <button
-                                        type="button"
-                                        onClick={handleClearSearch}
-                                        className="absolute top-1/2 right-12 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                )}
-                                <button type="submit" className="absolute top-0 end-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-600 focus:ring-4 focus:outline-none  dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                    <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                                    </svg>
-                                    <span className="sr-only">Search</span>
+                                <div className="relative flex-1 flex items-center">
+                                    <input
+                                        type="search"
+                                        id="search-dropdown"
+                                        className="input input-sm w-full border-0 focus:outline-none bg-transparent text-xs text-base-content placeholder:text-base-content/40 pl-3 pr-8"
+                                        placeholder="Search notes by title or content..."
+                                        value={searchQuery}
+                                        onChange={handleSearchInputChange}
+                                    />
+                                    {isSearching && searchQuery && (
+                                        <button
+                                            type="button"
+                                            onClick={handleClearSearch}
+                                            className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content absolute right-2"
+                                        >
+                                            <XMarkIcon className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary btn-sm join-item text-xs font-medium px-4"
+                                >
+                                    <MagnifyingGlassIcon className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Search</span>
                                 </button>
                             </div>
                         </div>
                     </form>
 
-                    {/* Quick Filter Chips */}
+                    {/* Quick Filter Chips (No Emojis) */}
                     {currentView !== 'recycled' && !isSearching && (
-                        <div className="max-w-7xl mx-auto px-4 pt-1 pb-3 flex items-center justify-center gap-2 flex-wrap">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-4 flex items-center justify-center gap-1.5 flex-wrap">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -808,10 +811,10 @@ function Notes() {
                                     setSelectedCategory('All categories');
                                     fetchAndFilterNotes('All categories', 0, pagination.pageSize);
                                 }}
-                                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                                className={`btn btn-xs rounded-xl text-xs transition-all ${
                                     quickFilter === 'all' && selectedCategory === 'All categories'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        ? 'btn-primary shadow-xs'
+                                        : 'btn-ghost bg-base-100 border border-base-300 text-base-content/70 hover:text-base-content'
                                 }`}
                             >
                                 All Notes
@@ -819,26 +822,28 @@ function Notes() {
                             <button
                                 type="button"
                                 onClick={() => setQuickFilter(quickFilter === 'pinned' ? 'all' : 'pinned')}
-                                className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                                className={`btn btn-xs rounded-xl text-xs gap-1 transition-all ${
                                     quickFilter === 'pinned'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        ? 'btn-primary shadow-xs'
+                                        : 'btn-ghost bg-base-100 border border-base-300 text-base-content/70 hover:text-base-content'
                                 }`}
                             >
-                                <span>📌 Pinned</span>
+                                <BookmarkIcon className="w-3 h-3" />
+                                <span>Pinned</span>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setQuickFilter(quickFilter === 'favorites' ? 'all' : 'favorites')}
-                                className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                                className={`btn btn-xs rounded-xl text-xs gap-1 transition-all ${
                                     quickFilter === 'favorites'
-                                        ? 'bg-amber-500 text-white'
-                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        ? 'btn-warning text-warning-content shadow-xs'
+                                        : 'btn-ghost bg-base-100 border border-base-300 text-base-content/70 hover:text-base-content'
                                 }`}
                             >
-                                <span>⭐ Favorites</span>
+                                <StarIcon className="w-3 h-3 text-warning" />
+                                <span>Favorites</span>
                             </button>
-                            {categories.slice(0, 5).map((cat) => (
+                            {categories.slice(0, 6).map((cat) => (
                                 <button
                                     key={cat.id}
                                     type="button"
@@ -846,10 +851,10 @@ function Notes() {
                                         setQuickFilter('all');
                                         selectCategory(cat.name);
                                     }}
-                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                                    className={`btn btn-xs rounded-xl text-xs transition-all ${
                                         selectedCategory === cat.name
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            ? 'btn-primary shadow-xs'
+                                            : 'btn-ghost bg-base-100 border border-base-300 text-base-content/70 hover:text-base-content'
                                     }`}
                                 >
                                     {cat.name}
@@ -858,91 +863,77 @@ function Notes() {
                         </div>
                     )}
 
-                    {/* Display Notes */}
-                    <div className="p-4 max-w-7xl mx-auto">
-                        <div className="mb-4 flex justify-between items-center flex-wrap gap-4">
+                    {/* Display Notes Section */}
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                        <div className="mb-4 flex justify-between items-center flex-wrap gap-3">
                             <div className="flex items-center gap-2">
-                                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                    {isSearching ? 'Search Results' : currentView === 'recycled' ? 'Recycled Notes' : 'Notes'}
+                                <h2 className="text-base font-semibold text-base-content">
+                                    {isSearching ? 'Search Results' : currentView === 'recycled' ? 'Recycled Notes' : 'All Notes'}
                                 </h2>
                                 {isSearching && (
-                                    <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                                    <span className="text-sm font-medium text-base-content/60">
                                         for "{searchQuery}"
                                     </span>
                                 )}
+                                <span className="badge badge-sm badge-neutral">
+                                    {pagination.totalNotesCount}
+                                </span>
                             </div>
+
                             <div className="flex items-center gap-3">
                                 {currentView === 'recycled' && notes.length > 0 && (
                                     <button
                                         type="button"
                                         onClick={() => setEmptyConfirmOpen(true)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-800/50 transition cursor-pointer"
+                                        className="btn btn-error btn-outline btn-xs rounded-xl gap-1"
                                     >
                                         <TrashIcon className="w-3.5 h-3.5" />
-                                        <span>Empty Recycle Bin</span>
+                                        <span>Empty Bin</span>
                                     </button>
                                 )}
 
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {pagination.totalNotesCount} {pagination.totalNotesCount === 1 ? 'note' : 'notes'}
-                                </p>
-
                                 {/* View Mode Toggle (Grid / List) */}
-                                <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <div className="join border border-base-300 rounded-xl bg-base-100 p-0.5 shadow-2xs">
                                     <button
                                         type="button"
                                         onClick={() => setViewMode('grid')}
-                                        className={`p-1.5 rounded-lg transition cursor-pointer ${
+                                        className={`btn btn-xs btn-square border-0 join-item ${
                                             viewMode === 'grid'
-                                                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-xs'
-                                                : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                                ? 'bg-base-200 text-primary font-semibold shadow-2xs'
+                                                : 'btn-ghost text-base-content/60'
                                         }`}
                                         title="Grid View"
                                     >
-                                        <Squares2X2Icon className="w-4 h-4" />
+                                        <Squares2X2Icon className="w-3.5 h-3.5" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setViewMode('list')}
-                                        className={`p-1.5 rounded-lg transition cursor-pointer ${
+                                        className={`btn btn-xs btn-square border-0 join-item ${
                                             viewMode === 'list'
-                                                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-xs'
-                                                : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                                ? 'bg-base-200 text-primary font-semibold shadow-2xs'
+                                                : 'btn-ghost text-base-content/60'
                                         }`}
                                         title="List View"
                                     >
-                                        <Bars3Icon className="w-4 h-4" />
+                                        <Bars3Icon className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
 
                                 {/* Page Size Selector */}
-                                <div className="relative" ref={pageSizeDropdownRef}>
-                                    <button
-                                        onClick={togglePageSizeDropdown}
-                                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                <div className="flex items-center gap-1.5 text-xs text-base-content/60">
+                                    <span>Show:</span>
+                                    <select
+                                        value={pagination.pageSize}
+                                        onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                                        className="select select-bordered select-xs rounded-xl bg-base-100 border-base-300 text-xs font-semibold focus:outline-primary"
                                     >
-                                        <span className="mr-2">Show:</span>
-                                        <span className="font-semibold">{pagination.pageSize}</span>
-                                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-
-                                    <div className={`absolute right-0 top-full mt-1 z-100 ${isPageSizeDropdownOpen ? 'block' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-24 dark:bg-gray-700`}>
-                                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-                                            {[5, 10, 15, 20, 25, 50].map((size) => (
-                                                <li key={size}>
-                                                    <button
-                                                        onClick={() => handlePageSizeChange(size)}
-                                                        className={`block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ${pagination.pageSize === size ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200' : ''
-                                                            }`}
-                                                    >
-                                                        {size}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                        {[10, 20, 30, 50].map((size) => (
+                                            <option key={size} value={size}>
+                                                {size}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                         </div>

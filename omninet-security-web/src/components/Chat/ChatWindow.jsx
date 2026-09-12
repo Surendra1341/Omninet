@@ -62,7 +62,7 @@ const ChatWindow = () => {
   const hasMore = hasMoreByConversation[activeConversationId] || false;
   const typers = Object.values(typingByConversation[activeConversationId] || {});
 
-  // Scroll to bottom on conversation change or new message (if user was near bottom)
+  // Scroll to bottom on conversation change or new message
   useEffect(() => {
     if (!showScrollBottom) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -85,20 +85,20 @@ const ChatWindow = () => {
     const el = document.getElementById(`msg-${msgId}`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('bg-indigo-500/20');
-      setTimeout(() => el.classList.remove('bg-indigo-500/20'), 1500);
+      el.classList.add('bg-primary/10');
+      setTimeout(() => el.classList.remove('bg-primary/10'), 1500);
     }
   };
 
   if (!activeConversation) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-slate-950/60 p-6 text-center select-none">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-950/50 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 shadow-lg shadow-indigo-950/50">
+      <div className="flex-1 flex flex-col items-center justify-center bg-base-100 p-8 text-center select-none">
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-4 shadow-xs">
           <ChatBubbleLeftEllipsisIcon className="w-8 h-8" />
         </div>
-        <h3 className="text-lg font-bold text-slate-200">OmniNet Real-time Chat</h3>
-        <p className="text-sm text-slate-400 max-w-sm mt-1">
-          Select a conversation from the sidebar or start a new direct message or group chat.
+        <h3 className="text-base font-semibold text-base-content">OmniNet Secure Chat</h3>
+        <p className="text-xs text-base-content/60 max-w-sm mt-1 leading-relaxed">
+          Select an ongoing conversation or start a new direct message or group conversation to communicate in real time.
         </p>
       </div>
     );
@@ -133,34 +133,34 @@ const ChatWindow = () => {
     : messages;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-950/80 relative overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-base-100 relative overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md z-10 select-none">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-base-300 bg-base-100/90 backdrop-blur-md z-10 select-none">
         <div className="flex items-center gap-3 min-w-0">
           {/* Mobile Back Button */}
           <button
             type="button"
             onClick={() => setActiveConversation(null)}
-            className="md:hidden text-slate-400 hover:text-slate-200 p-1 -ml-1 rounded-lg hover:bg-slate-800"
+            className="md:hidden btn btn-ghost btn-xs btn-square -ml-1 text-base-content/70"
           >
-            <ArrowLeftIcon className="w-5 h-5" />
+            <ArrowLeftIcon className="w-4 h-4" />
           </button>
 
           {/* Avatar */}
           <div className="relative shrink-0">
             <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-md ${
+              className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shadow-xs ${
                 isGroup
-                  ? 'bg-gradient-to-tr from-purple-600 to-indigo-600 text-white'
-                  : 'bg-gradient-to-tr from-indigo-700 to-slate-700 text-slate-100'
+                  ? 'bg-secondary text-secondary-content'
+                  : 'bg-primary text-primary-content'
               }`}
             >
               {headerTitle.slice(0, 2).toUpperCase()}
             </div>
             {!isGroup && (
               <span
-                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-slate-900 ${
-                  isOnline ? 'bg-emerald-400 shadow-xs shadow-emerald-400' : 'bg-slate-500'
+                className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${
+                  isOnline ? 'bg-success' : 'bg-base-content/30'
                 }`}
               />
             )}
@@ -168,14 +168,14 @@ const ChatWindow = () => {
 
           {/* Titles */}
           <div className="truncate">
-            <h3 className="text-sm font-bold text-slate-100 truncate">{headerTitle}</h3>
+            <h3 className="text-sm font-semibold text-base-content truncate">{headerTitle}</h3>
             <p className="text-xs truncate">
               {typers.length > 0 ? (
-                <span className="text-indigo-400 font-medium italic animate-pulse">
+                <span className="text-primary font-medium italic animate-pulse">
                   {typers[0].userName} is typing...
                 </span>
               ) : (
-                <span className={isOnline ? 'text-emerald-400 font-medium' : 'text-slate-400'}>
+                <span className={isOnline ? 'text-success font-medium' : 'text-base-content/50'}>
                   {subtitle}
                 </span>
               )}
@@ -189,45 +189,45 @@ const ChatWindow = () => {
           <button
             type="button"
             onClick={() => setIsSearchingInChat(!isSearchingInChat)}
-            className={`p-2 rounded-xl transition-colors ${
+            className={`btn btn-ghost btn-sm btn-square rounded-xl transition-colors ${
               isSearchingInChat
-                ? 'bg-indigo-600/20 text-indigo-400'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                ? 'bg-primary/10 text-primary'
+                : 'text-base-content/60 hover:text-base-content hover:bg-base-200'
             }`}
             title="Search in conversation"
           >
-            <MagnifyingGlassIcon className="w-5 h-5" />
+            <MagnifyingGlassIcon className="w-4 h-4" />
           </button>
 
           {/* Group / Contact details toggle */}
           <button
             type="button"
             onClick={() => setIsGroupInfoOpen(true)}
-            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 rounded-xl transition-colors"
+            className="btn btn-ghost btn-sm btn-square rounded-xl text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors"
             title="View details"
           >
-            <InformationCircleIcon className="w-5 h-5" />
+            <InformationCircleIcon className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* In-chat search bar */}
       {isSearchingInChat && (
-        <div className="px-4 py-2 bg-slate-900/95 border-b border-slate-800 flex items-center gap-2 animate-slide-down">
-          <MagnifyingGlassIcon className="w-4 h-4 text-slate-400 shrink-0" />
+        <div className="px-4 py-2.5 bg-base-200/90 border-b border-base-300 flex items-center gap-2">
+          <MagnifyingGlassIcon className="w-4 h-4 text-base-content/50 shrink-0" />
           <input
             type="text"
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
             placeholder="Search messages in this conversation..."
-            className="flex-1 bg-transparent text-xs text-slate-200 placeholder-slate-500 focus:outline-none"
+            className="flex-1 bg-transparent text-xs text-base-content placeholder:text-base-content/40 focus:outline-none"
             autoFocus
           />
           {searchFilter && (
             <button
               type="button"
               onClick={() => setSearchFilter('')}
-              className="text-xs text-slate-400 hover:text-slate-200"
+              className="text-xs text-base-content/50 hover:text-base-content font-medium"
             >
               Clear
             </button>
@@ -239,7 +239,7 @@ const ChatWindow = () => {
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 py-3 space-y-1 relative"
+        className="flex-1 overflow-y-auto px-5 py-4 space-y-1 relative bg-base-200/30"
       >
         {/* Load older messages button */}
         {hasMore && (
@@ -248,7 +248,7 @@ const ChatWindow = () => {
               type="button"
               onClick={() => loadMessages(activeConversationId, true)}
               disabled={isLoadingMessages}
-              className="px-3 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs rounded-full border border-slate-700 transition-colors shadow-xs"
+              className="btn btn-xs btn-ghost border border-base-300 text-base-content/70 rounded-full"
             >
               {isLoadingMessages ? 'Loading...' : 'Load older messages'}
             </button>
@@ -257,11 +257,11 @@ const ChatWindow = () => {
 
         {displayedMessages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-center select-none">
-            <p className="text-sm font-medium text-slate-400">
+            <p className="text-xs font-semibold text-base-content/60">
               {searchFilter ? 'No matching messages found' : 'No messages yet'}
             </p>
             {!searchFilter && (
-              <p className="text-xs text-slate-500 mt-1">Send a message to say hello 👋</p>
+              <p className="text-[11px] text-base-content/40 mt-1">Send a message to start the conversation</p>
             )}
           </div>
         ) : (
@@ -276,7 +276,7 @@ const ChatWindow = () => {
               <React.Fragment key={msg.id || idx}>
                 {showDateDivider && (
                   <div className="flex items-center justify-center my-4 select-none">
-                    <span className="bg-slate-800/90 text-slate-400 text-[11px] font-medium px-3 py-1 rounded-full border border-slate-700/60 shadow-xs">
+                    <span className="bg-base-200 text-base-content/60 text-[11px] font-medium px-3 py-1 rounded-full border border-base-300 shadow-2xs">
                       {formatDateDivider(msg.created_at)}
                     </span>
                   </div>
@@ -302,7 +302,7 @@ const ChatWindow = () => {
         <button
           type="button"
           onClick={scrollToBottom}
-          className="absolute bottom-20 right-6 p-2 rounded-full bg-slate-800/90 text-indigo-400 border border-slate-700/80 shadow-lg hover:bg-slate-700 transition-all active:scale-95 z-20 animate-fade-in"
+          className="btn btn-circle btn-sm btn-outline absolute bottom-20 right-6 bg-base-100 border-base-300 shadow-md text-primary hover:bg-base-200 transition-all active:scale-95 z-20"
           title="Scroll to latest"
         >
           <ChevronDoubleDownIcon className="w-4 h-4" />

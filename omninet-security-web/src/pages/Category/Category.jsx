@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { categoryAPI, notesAPI } from '../../services/api.js';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import AddIcon from '@mui/icons-material/Add';
-import FolderIcon from '@mui/icons-material/Folder';
+import {
+  FolderIcon,
+  PlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
 function Category() {
@@ -190,16 +193,16 @@ function Category() {
       <Toaster position="top-right" />
 
       {/* Add Category Card */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/80 rounded-2xl p-6 shadow-sm">
+      <div className="card bg-base-100 border border-base-300 shadow-xs rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
-            <AddIcon className="w-5 h-5" />
+          <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
+            <PlusIcon className="w-5 h-5 stroke-2" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-bold text-base-content tracking-tight">
               Add New Category
             </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-base-content/60">
               Organize your notes into distinct categories
             </p>
           </div>
@@ -207,16 +210,16 @@ function Category() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
               Category Name
             </label>
             <input
               type="text"
               name="name"
-              placeholder="e.g., Work, Personal, Meeting Notes..."
+              placeholder="e.g., Work, Personal, Architecture..."
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              className="input input-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl focus:border-primary"
               required
               maxLength="30"
             />
@@ -224,10 +227,10 @@ function Category() {
 
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider">
                 Description
               </label>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-base-content/40">
                 {formData.description.length}/180
               </span>
             </div>
@@ -239,7 +242,7 @@ function Category() {
               rows="2"
               required
               maxLength="180"
-              className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-y"
+              className="textarea textarea-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl focus:border-primary resize-y"
             />
           </div>
 
@@ -247,16 +250,16 @@ function Category() {
             <button
               type="submit"
               disabled={isSubmitting || !formData.name.trim() || !formData.description.trim()}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-blue-500/20 active:scale-95"
+              className="btn btn-primary rounded-xl font-medium text-sm gap-2"
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="loading loading-spinner loading-xs" />
                   <span>Adding...</span>
                 </>
               ) : (
                 <>
-                  <AddIcon className="w-4 h-4" />
+                  <PlusIcon className="w-4 h-4 stroke-2" />
                   <span>Create Category</span>
                 </>
               )}
@@ -268,33 +271,33 @@ function Category() {
       {/* Categories Grid Header */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-lg font-bold text-base-content tracking-tight">
               All Categories
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+            <span className="badge badge-sm badge-neutral border-base-300 font-medium">
               {categories.length}
             </span>
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-3 text-sm text-gray-500">Loading categories...</p>
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <span className="loading loading-spinner loading-md text-primary" />
+            <p className="text-sm text-base-content/50">Loading categories...</p>
           </div>
         ) : categories.length === 0 ? (
-          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-8">
-            <FolderIcon className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-            <p className="text-gray-600 dark:text-gray-300 font-medium">No categories found</p>
-            <p className="text-xs text-gray-400 mt-1">Create your first category using the form above.</p>
+          <div className="text-center py-12 bg-base-100 rounded-2xl border border-base-300 p-8">
+            <FolderIcon className="w-12 h-12 mx-auto text-base-content/30 mb-3" />
+            <p className="text-base-content/80 font-medium">No categories found</p>
+            <p className="text-xs text-base-content/50 mt-1">Create your first category using the form above.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {categories.map((category) => (
               <div
                 key={category.id}
-                className="bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500/50 transition-all duration-200 group relative flex flex-col justify-between"
+                className="card bg-base-100 border border-base-300 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-primary/40 transition-all duration-200 group flex flex-col justify-between"
               >
                 {isEditing.id === category.id ? (
                   // Edit Mode
@@ -305,7 +308,7 @@ function Category() {
                         name="name"
                         value={isEditing.name}
                         onChange={handleEditInputChange}
-                        className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                        className="input input-bordered input-sm w-full bg-base-200/50 text-base-content rounded-lg"
                         required
                         maxLength="30"
                       />
@@ -316,11 +319,11 @@ function Category() {
                         value={isEditing.description}
                         onChange={handleEditInputChange}
                         rows="2"
-                        className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-blue-500 outline-none resize-none"
+                        className="textarea textarea-bordered textarea-sm w-full bg-base-200/50 text-base-content rounded-lg resize-none"
                         required
                         maxLength="180"
                       />
-                      <div className="text-[10px] text-gray-400 text-right mt-0.5">
+                      <div className="text-[10px] text-base-content/40 text-right mt-0.5">
                         {isEditing.description.length}/180
                       </div>
                     </div>
@@ -328,14 +331,14 @@ function Category() {
                       <button
                         type="button"
                         onClick={cancelEdit}
-                        className="px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="btn btn-ghost btn-xs text-base-content/70 rounded-lg"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition"
+                        className="btn btn-primary btn-xs rounded-lg font-medium"
                       >
                         {isSubmitting ? 'Saving...' : 'Save'}
                       </button>
@@ -346,42 +349,42 @@ function Category() {
                   <>
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="p-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="p-1.5 bg-primary/10 text-primary rounded-lg shrink-0">
                             <FolderIcon className="w-4 h-4" />
                           </span>
-                          <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
+                          <h3 className="text-sm font-semibold text-base-content truncate">
                             {category.name}
                           </h3>
                         </div>
 
                         {/* Action buttons */}
-                        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => startEdit(category)}
-                            className="p-1.5 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"
+                            className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-primary rounded-lg"
                             title="Edit category"
                           >
-                            <EditIcon style={{ fontSize: '1.1rem' }} />
+                            <PencilSquareIcon className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(category)}
-                            className="p-1.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"
+                            className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-error rounded-lg"
                             title="Delete category"
                           >
-                            <DeleteIcon style={{ fontSize: '1.1rem' }} />
+                            <TrashIcon className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
 
-                      <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-3 mb-4 leading-relaxed">
+                      <p className="text-xs text-base-content/70 line-clamp-3 mb-4 leading-relaxed">
                         {category.description || 'No description provided'}
                       </p>
                     </div>
 
-                    <div className="text-[11px] text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700/80 pt-3 flex items-center justify-between">
+                    <div className="text-[11px] text-base-content/40 border-t border-base-200 pt-3 flex items-center justify-between">
                       <span>Created</span>
-                      <span className="font-medium text-gray-500 dark:text-gray-400">
+                      <span className="font-medium text-base-content/60">
                         {formatDate(category.createdDate)}
                       </span>
                     </div>
@@ -395,31 +398,31 @@ function Category() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-fade-in">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="card bg-base-100 border border-base-300 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-fade-in">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl">
-                <DeleteIcon className="w-6 h-6" />
+              <div className="p-3 bg-error/10 text-error rounded-xl">
+                <ExclamationTriangleIcon className="w-6 h-6 stroke-2" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h3 className="text-base font-bold text-base-content">
                   Delete Category
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-base-content/60">
                   This action cannot be undone
                 </p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-              Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">"{deleteConfirm.name}"</span>? All notes associated with this category will also be deleted.
+            <p className="text-sm text-base-content/70 mb-6 leading-relaxed">
+              Are you sure you want to delete <span className="font-semibold text-base-content">"{deleteConfirm.name}"</span>? All notes associated with this category will also be deleted.
             </p>
 
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-2 justify-end">
               <button
                 type="button"
                 onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition"
+                className="btn btn-ghost btn-sm rounded-xl"
               >
                 Cancel
               </button>
@@ -427,7 +430,7 @@ function Category() {
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => handleDelete(deleteConfirm.id)}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm shadow-red-500/20 active:scale-95"
+                className="btn btn-error btn-sm text-white rounded-xl font-medium"
               >
                 {isSubmitting ? 'Deleting...' : 'Delete Category'}
               </button>

@@ -99,23 +99,23 @@ const MessageInput = ({ onSendMessage }) => {
   };
 
   return (
-    <div className="relative border-t border-slate-800 bg-slate-900/90 backdrop-blur-md px-4 py-3">
+    <div className="relative border-t border-base-300 bg-base-100 px-4 py-3">
       {/* Reply Banner */}
       {replyingTo && (
-        <div className="flex items-center justify-between bg-slate-800/90 border-l-4 border-indigo-500 rounded-r-lg px-3 py-2 mb-2 text-xs animate-slide-up">
+        <div className="flex items-center justify-between bg-base-200 border-l-4 border-primary rounded-r-xl px-3 py-2 mb-2 text-xs">
           <div className="flex items-center gap-2 overflow-hidden">
-            <ArrowUturnLeftIcon className="w-4 h-4 text-indigo-400 shrink-0" />
+            <ArrowUturnLeftIcon className="w-4 h-4 text-primary shrink-0" />
             <div className="truncate">
-              <span className="font-semibold text-indigo-300">
+              <span className="font-semibold text-base-content">
                 Replying to {replyingTo.sender_name || replyingTo.sender_email}
               </span>
-              <p className="text-slate-400 truncate text-[11px]">{replyingTo.content}</p>
+              <p className="text-base-content/60 truncate text-[11px]">{replyingTo.content}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setReplyingTo(null)}
-            className="text-slate-400 hover:text-slate-200 p-1"
+            className="text-base-content/40 hover:text-base-content p-1"
           >
             <XMarkIcon className="w-4 h-4" />
           </button>
@@ -124,12 +124,12 @@ const MessageInput = ({ onSendMessage }) => {
 
       {/* Edit Banner */}
       {editingMessage && (
-        <div className="flex items-center justify-between bg-slate-800/90 border-l-4 border-cyan-500 rounded-r-lg px-3 py-2 mb-2 text-xs animate-slide-up">
+        <div className="flex items-center justify-between bg-base-200 border-l-4 border-secondary rounded-r-xl px-3 py-2 mb-2 text-xs">
           <div className="flex items-center gap-2 overflow-hidden">
-            <PencilSquareIcon className="w-4 h-4 text-cyan-400 shrink-0" />
+            <PencilSquareIcon className="w-4 h-4 text-secondary shrink-0" />
             <div className="truncate">
-              <span className="font-semibold text-cyan-300">Editing message</span>
-              <p className="text-slate-400 truncate text-[11px]">{editingMessage.content}</p>
+              <span className="font-semibold text-base-content">Editing message</span>
+              <p className="text-base-content/60 truncate text-[11px]">{editingMessage.content}</p>
             </div>
           </div>
           <button
@@ -138,7 +138,7 @@ const MessageInput = ({ onSendMessage }) => {
               setEditingMessage(null);
               setText('');
             }}
-            className="text-slate-400 hover:text-slate-200 p-1"
+            className="text-base-content/40 hover:text-base-content p-1"
           >
             <XMarkIcon className="w-4 h-4" />
           </button>
@@ -147,13 +147,13 @@ const MessageInput = ({ onSendMessage }) => {
 
       {/* Emoji Picker Popover */}
       {showEmojiPicker && (
-        <div className="absolute bottom-full left-4 mb-2 p-3 bg-slate-900/95 border border-slate-700/80 rounded-2xl shadow-2xl backdrop-blur-xl z-30 grid grid-cols-6 gap-2 w-72 max-h-52 overflow-y-auto">
+        <div className="absolute bottom-full left-4 mb-2 p-3 bg-base-100 border border-base-300 rounded-2xl shadow-xl z-30 grid grid-cols-6 gap-2 w-72 max-h-52 overflow-y-auto">
           {COMMON_EMOJIS.map((emoji) => (
             <button
               key={emoji}
               type="button"
               onClick={() => insertEmoji(emoji)}
-              className="text-xl p-1.5 hover:scale-125 active:scale-95 transition-transform rounded-lg hover:bg-slate-800/80"
+              className="text-lg p-1.5 hover:scale-125 active:scale-95 transition-transform rounded-lg hover:bg-base-200"
             >
               {emoji}
             </button>
@@ -162,12 +162,12 @@ const MessageInput = ({ onSendMessage }) => {
       )}
 
       {/* Input controls container */}
-      <div className="flex items-end gap-2 bg-slate-800/70 border border-slate-700/70 rounded-2xl px-3 py-2 focus-within:border-indigo-500/80 focus-within:ring-1 focus-within:ring-indigo-500/30 transition-all">
+      <div className="flex items-end gap-2 bg-base-200/70 border border-base-300 rounded-2xl px-3 py-1.5 focus-within:border-primary/80 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
         {/* Emoji trigger button */}
         <button
           type="button"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="text-slate-400 hover:text-indigo-400 p-1 rounded-full transition-colors shrink-0 mb-0.5"
+          className="text-base-content/50 hover:text-primary p-1 rounded-full transition-colors shrink-0 mb-0.5"
           title="Insert emoji"
         >
           <FaceSmileIcon className="w-5 h-5" />
@@ -181,7 +181,7 @@ const MessageInput = ({ onSendMessage }) => {
           onKeyDown={handleKeyDown}
           placeholder="Type a message... (Enter to send, Shift+Enter for newline)"
           rows={1}
-          className="flex-1 bg-transparent text-slate-100 placeholder-slate-500 text-sm focus:outline-none resize-none max-h-32 py-1 leading-relaxed"
+          className="flex-1 bg-transparent text-base-content placeholder:text-base-content/40 text-xs sm:text-sm focus:outline-none resize-none max-h-32 py-1 leading-relaxed"
         />
 
         {/* Send Button */}
@@ -189,10 +189,8 @@ const MessageInput = ({ onSendMessage }) => {
           type="button"
           onClick={handleSend}
           disabled={!text.trim()}
-          className={`p-2 rounded-xl transition-all duration-200 shrink-0 mb-0.5 ${
-            text.trim()
-              ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/30 hover:opacity-90 hover:scale-105 active:scale-95'
-              : 'text-slate-600 cursor-not-allowed'
+          className={`btn btn-primary btn-sm btn-square rounded-xl shadow-xs transition-all shrink-0 mb-0.5 ${
+            !text.trim() ? 'btn-disabled opacity-40' : ''
           }`}
           title="Send message"
         >

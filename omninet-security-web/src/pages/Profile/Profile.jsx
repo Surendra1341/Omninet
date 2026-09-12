@@ -1,23 +1,15 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Button,
-  Avatar,
-  Divider,
-  Stack,
-  Alert,
-} from '@mui/material';
-import { GitHub, Email } from '@mui/icons-material';
-import GoogleIcon from '@mui/icons-material/Google';
+  UserCircleIcon,
+  KeyIcon,
+  ShieldCheckIcon,
+  EnvelopeIcon,
+} from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 function Profile({ user }) {
-  const { addPassword, error, setError } = useAuthStore();
+  const { addPassword, error, setError, changePassword } = useAuthStore();
   const [form, setForm] = useState({
     email: user?.email || '',
     password: '',
@@ -27,7 +19,7 @@ function Profile({ user }) {
 
   const provider = user?.provider || user?.primaryProvider || 'email';
 
-  // Parse linked providers from possible shapes (string, array, nested attributes)
+  // Parse linked providers
   const linkedProviders = useMemo(() => {
     const raw = user?.linkedProviders ?? user?.attributes?.linkedProviders;
     if (!raw) return [];
@@ -42,24 +34,22 @@ function Profile({ user }) {
   }, [user]);
 
   const hasEmailLinked = linkedProviders.includes('email');
-
   const hasPassword = useMemo(() => {
     return Boolean(user?.attributes?.hasPassword || provider === 'email');
   }, [user, provider]);
 
-  // Disable add password if email provider is already linked (per requirement)
-  const disablePasswordForm = hasEmailLinked; // For Add Password form
-
-  // Change Password form state (for email-linked accounts)
-  const [changeForm, setChangeForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  // Change Password form state
+  const [changeForm, setChangeForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
 
   const onChangeChangePwd = (e) => {
     const { name, value } = e.target;
     setChangeForm((prev) => ({ ...prev, [name]: value }));
     if (error) setError(null);
   };
-
-  const { changePassword } = useAuthStore();
 
   const onSubmitChangePwd = async (e) => {
     e.preventDefault();
@@ -134,221 +124,161 @@ function Profile({ user }) {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 900, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
-        Profile
-      </Typography>
+    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-base-content">Profile Settings</h1>
+        <p className="text-xs text-base-content/60 mt-1">Manage your identity, connected accounts, and security credentials.</p>
+      </div>
 
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="center">
-            <Avatar sx={{ width: 72, height: 72 }} src={user?.avatarUrl}>
-              {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
-            </Avatar>
-            <Box sx={{ flex: 1, width: '100%' }}>
-              <Typography variant="h6">{user?.name || 'Unnamed User'}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {user?.email}
-              </Typography>
-              <Stack direction="row" spacing={2} sx={{ mt: 1, flexWrap: 'wrap' }}>
-                <ChipLike label={`User ID: ${user?.id || 'N/A'}`} />
-              </Stack>
-
-              {/* Linked providers section */}
-              <Box sx={{ mt: 1.5 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
-                  Linked providers:
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
-                  {linkedProviders.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">None</Typography>
-                  ) : (
-                    linkedProviders.map((p, idx) => (
-                      <ProviderBadge key={`${p}-${idx}`} provider={p} />
-                    ))
-                  )}
-                </Stack>
-              </Box>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
-
-      <Card variant="outlined">
-        <CardContent>
-          {!hasEmailLinked ? (
-            <>
-              <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                {hasPassword ? 'Update Password' : 'Add a Password'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {hasPassword
-                  ? 'Change your account password.'
-                  : 'Set a password so you can also sign in with email + password.'}
-              </Typography>
-
-              {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {error}
-                </Alert>
+      {/* Account Overview Card */}
+      <section className="card bg-base-100 border border-base-300 rounded-2xl p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+          <div className="avatar placeholder shrink-0">
+            <div className="w-20 h-20 rounded-2xl bg-primary/15 text-primary border border-primary/20 flex items-center justify-center font-bold text-2xl shadow-xs">
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user?.name || 'User'} className="rounded-2xl" />
+              ) : (
+                <span>{user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}</span>
               )}
+            </div>
+          </div>
 
-              <Box component="form" onSubmit={onSubmit} noValidate>
-                <Stack spacing={2}>
-                  <TextField
-                    name="email"
-                    label="Email"
-                    value={form.email}
-                    onChange={onChange}
-                    fullWidth
-                    disabled
-                  />
-                  <Divider />
-                  <TextField
-                    name="password"
-                    type="password"
-                    label={hasPassword ? 'New Password' : 'Password'}
-                    value={form.password}
-                    onChange={onChange}
-                    required
-                    fullWidth
-                  />
-                  <TextField
-                    name="confirmPassword"
-                    type="password"
-                    label="Confirm Password"
-                    value={form.confirmPassword}
-                    onChange={onChange}
-                    required
-                    fullWidth
-                  />
-                  <Box>
-                    <Button type="submit" variant="contained" disabled={submitting}>
-                      {submitting ? 'Saving...' : hasPassword ? 'Update Password' : 'Add Password'}
-                    </Button>
-                  </Box>
-                </Stack>
-              </Box>
-            </>
-          ) : (
-            <>
-              <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                Change Password
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Update your password for email authentication.
-              </Typography>
+          <div className="flex-1 text-center sm:text-left space-y-2">
+            <h2 className="text-lg font-bold text-base-content">{user?.name || 'Unnamed User'}</h2>
+            <p className="text-xs text-base-content/60 flex items-center justify-center sm:justify-start gap-1.5">
+              <EnvelopeIcon className="w-3.5 h-3.5 text-base-content/40" />
+              <span>{user?.email}</span>
+            </p>
 
-              {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {error}
-                </Alert>
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+              <span className="badge badge-outline border-base-300 text-base-content/70 text-[11px] py-2 px-2.5">
+                ID: {user?.id ? `${user.id.slice(0, 8)}...` : 'N/A'}
+              </span>
+
+              {linkedProviders.length === 0 ? (
+                <span className="badge badge-outline border-base-300 text-base-content/50 text-[11px] py-2 px-2.5">
+                  Provider: {provider}
+                </span>
+              ) : (
+                linkedProviders.map((p, idx) => (
+                  <span
+                    key={`${p}-${idx}`}
+                    className="badge badge-primary badge-outline text-[11px] font-medium py-2 px-2.5 capitalize"
+                  >
+                    {p}
+                  </span>
+                ))
               )}
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <Box component="form" onSubmit={onSubmitChangePwd} noValidate>
-                <Stack spacing={2}>
-                  <TextField
-                    name="currentPassword"
-                    type="password"
-                    label="Current Password"
-                    value={changeForm.currentPassword}
-                    onChange={onChangeChangePwd}
-                    required
-                    fullWidth
-                  />
-                  <TextField
-                    name="newPassword"
-                    type="password"
-                    label="New Password"
-                    value={changeForm.newPassword}
-                    onChange={onChangeChangePwd}
-                    required
-                    fullWidth
-                  />
-                  <TextField
-                    name="confirmPassword"
-                    type="password"
-                    label="Confirm New Password"
-                    value={changeForm.confirmPassword}
-                    onChange={onChangeChangePwd}
-                    required
-                    fullWidth
-                  />
-                  <Box>
-                    <Button type="submit" variant="contained" disabled={submitting}>
-                      {submitting ? 'Changing...' : 'Change Password'}
-                    </Button>
-                  </Box>
-                </Stack>
-              </Box>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </Box>
-  );
-}
+      {/* Security & Password Card */}
+      <section className="card bg-base-100 border border-base-300 rounded-2xl p-6 shadow-xs">
+        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-base-300">
+          <KeyIcon className="w-5 h-5 text-primary" />
+          <h2 className="text-base font-semibold text-base-content">
+            {!hasEmailLinked ? (hasPassword ? 'Update Password' : 'Add Password') : 'Change Password'}
+          </h2>
+        </div>
 
-// Simple Chip-like visual using Typography/Box to avoid importing MUI Chip if not used elsewhere
-function ChipLike({ label }) {
-  return (
-    <Box
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        px: 1,
-        py: 0.5,
-        bgcolor: 'grey.100',
-        borderRadius: 1,
-        border: '1px solid',
-        borderColor: 'grey.200',
-        fontSize: 12,
-      }}
-    >
-      {label}
-    </Box>
+        {error && (
+          <div className="alert alert-error mb-4 text-xs py-2.5 rounded-xl font-medium">
+            <span>{error}</span>
+          </div>
+        )}
+
+        {!hasEmailLinked ? (
+          <form onSubmit={onSubmit} className="space-y-4 max-w-md">
+            <div>
+              <label className="block text-xs font-semibold text-base-content/80 mb-1">Email</label>
+              <input
+                type="email"
+                value={form.email}
+                disabled
+                className="input input-bordered input-sm w-full bg-base-200 border-base-300 rounded-xl text-base-content/60"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-base-content/80 mb-1">
+                {hasPassword ? 'New Password' : 'Password'}
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={onChange}
+                required
+                className="input input-bordered input-sm w-full bg-base-100 border-base-300 rounded-xl text-base-content focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-base-content/80 mb-1">Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={onChange}
+                required
+                className="input input-bordered input-sm w-full bg-base-100 border-base-300 rounded-xl text-base-content focus:border-primary"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn btn-primary btn-sm rounded-xl shadow-xs"
+            >
+              {submitting ? 'Saving...' : hasPassword ? 'Update Password' : 'Add Password'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={onSubmitChangePwd} className="space-y-4 max-w-md">
+            <div>
+              <label className="block text-xs font-semibold text-base-content/80 mb-1">Current Password</label>
+              <input
+                type="password"
+                name="currentPassword"
+                value={changeForm.currentPassword}
+                onChange={onChangeChangePwd}
+                required
+                className="input input-bordered input-sm w-full bg-base-100 border-base-300 rounded-xl text-base-content focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-base-content/80 mb-1">New Password</label>
+              <input
+                type="password"
+                name="newPassword"
+                value={changeForm.newPassword}
+                onChange={onChangeChangePwd}
+                required
+                className="input input-bordered input-sm w-full bg-base-100 border-base-300 rounded-xl text-base-content focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-base-content/80 mb-1">Confirm New Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={changeForm.confirmPassword}
+                onChange={onChangeChangePwd}
+                required
+                className="input input-bordered input-sm w-full bg-base-100 border-base-300 rounded-xl text-base-content focus:border-primary"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn btn-primary btn-sm rounded-xl shadow-xs"
+            >
+              {submitting ? 'Changing...' : 'Change Password'}
+            </button>
+          </form>
+        )}
+      </section>
+    </main>
   );
 }
 
 export default Profile;
-
-function ProviderBadge({ provider }) {
-  const meta = getProviderMeta(provider);
-  return (
-    <Box
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 0.75,
-        px: 1,
-        py: 0.5,
-        bgcolor: 'grey.100',
-        borderRadius: 1,
-        border: '1px solid',
-        borderColor: 'grey.200',
-        fontSize: 12,
-      }}
-    >
-      <Box sx={{ display: 'inline-flex', alignItems: 'center', color: meta.color }}>
-        {meta.icon}
-      </Box>
-      <Typography variant="caption" sx={{ lineHeight: 1.2 }}>
-        {meta.label}
-      </Typography>
-    </Box>
-  );
-}
-
-function getProviderMeta(p) {
-  const key = String(p || '').toLowerCase();
-  switch (key) {
-    case 'github':
-      return { label: 'GitHub', color: '#24292e', icon: <GitHub fontSize="small" /> };
-    case 'google':
-      return { label: 'Google', color: '#4285F4', icon: <GoogleIcon fontSize="small" /> };
-    case 'email':
-      return { label: 'Email', color: '#6b7280', icon: <Email fontSize="small" /> };
-    default:
-      return { label: key || 'Unknown', color: '#6b7280', icon: <GoogleIcon fontSize="small" /> };
-  }
-}

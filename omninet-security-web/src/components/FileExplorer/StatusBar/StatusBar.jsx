@@ -14,19 +14,19 @@ const StatusBar = ({ totalItems, selectedCount, currentPath }) => {
   };
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
-      <div className="flex items-center">
-        <span>{getItemText()}</span>
+    <div className="flex items-center justify-between px-4 py-2 bg-base-200/50 border-t border-base-300 text-xs text-base-content/60 transition-colors">
+      <div className="flex items-center gap-1.5">
+        <span className="font-medium text-base-content/80">{getItemText()}</span>
       </div>
-      
-      <div className="flex items-center">
-        <span>
-          <strong className="font-medium">Location:</strong> {getCurrentLocationText()}
+
+      <div className="flex items-center truncate max-w-xs">
+        <span className="truncate">
+          <span className="font-semibold text-base-content/70">Location:</span> {getCurrentLocationText()}
         </span>
       </div>
-      
+
       <div className="flex items-center">
-        <span className="font-medium text-gray-700">OmniNet Storage</span>
+        <span className="text-[11px] font-medium text-base-content/50">OmniNet Cloud Drive</span>
       </div>
     </div>
   );

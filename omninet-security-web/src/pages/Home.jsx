@@ -12,24 +12,9 @@ import Category from "../pages/Category/Category";
 import Chat from "../pages/Chat/Chat";
 import AiChat from "../pages/AiChat/AiChat";
 import { ThemeProvider } from "../contexts/ThemeContext";
-import Lenis from "lenis";
 
 const Home = () => {
   const { user, logout, logoutAll, isAuthenticated } = useAuthStore();
-
-  useEffect(() => {
-    const lenis = new Lenis({ duration: 0.9, smoothWheel: true, touchMultiplier: 1.2 });
-    let frame;
-    const raf = (time) => {
-      lenis.raf(time);
-      frame = requestAnimationFrame(raf);
-    };
-    frame = requestAnimationFrame(raf);
-    return () => {
-      cancelAnimationFrame(frame);
-      lenis.destroy();
-    };
-  }, []);
 
   // console.log('Dashboard - User:', user);
   // console.log('Dashboard - IsAuthenticated:', isAuthenticated);
@@ -66,7 +51,7 @@ const Home = () => {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-base-200 text-base-content flex flex-col antialiased selection:bg-primary/20">
         <Navbar
           handleLogout={handleLogout}
           handleLogoutAll={handleLogoutAll}

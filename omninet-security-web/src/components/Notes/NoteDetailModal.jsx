@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import EditIcon from '@mui/icons-material/Edit';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import DownloadIcon from '@mui/icons-material/Download';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
+import {
+    PencilSquareIcon,
+    DocumentDuplicateIcon,
+    TrashIcon,
+    ArrowDownTrayIcon,
+    EyeIcon,
+    ArrowPathIcon,
+    XMarkIcon,
+    DocumentIcon
+} from '@heroicons/react/24/outline';
 import ToolTip from './ToolTip';
-import CloseIcon from '@mui/icons-material/Close';
-import { DocumentIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
 import FileActionModal, { canPreviewFile } from '../FileExplorer/Modals/FileActionModal';
 import storageClient from '../../services/storageClient';
 import toast from 'react-hot-toast';
@@ -200,72 +201,97 @@ function NoteDetailModal({
     };
 
     return (
-        <div className={`fixed inset-0 bg-black/30 flex items-center justify-center z-[60] p-4 transition-all duration-300 ease-in-out ${
+        <div className={`fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-[60] p-4 transition-all duration-300 ease-in-out ${
             isOpen && note 
                 ? 'opacity-100 pointer-events-auto' 
                 : 'opacity-0 pointer-events-none'
         }`}>
-            <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transition-all duration-300 ease-in-out ${
+            <div className={`card bg-base-100 border border-base-300 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transition-all duration-300 ease-in-out ${
                 isOpen && note 
                     ? 'opacity-100 scale-100 translate-y-0' 
                     : 'opacity-0 scale-95 translate-y-4'
             }`}>
                 {note && (
                     <div className="p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        <div className="flex justify-between items-center mb-5">
+                            <h2 className="text-lg font-bold text-base-content tracking-tight">
                                 {isEditing ? 'Edit Note' : 'Note Details'}
                             </h2>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center gap-1">
                                 {!isEditing && (
                                     <>
                                         {/* Edit Button */}
-                                        <ToolTip className="" title="Edit" event={() => setIsEditing(true)}>
-                                            <EditIcon/>
-                                        </ToolTip>
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-primary rounded-lg"
+                                            title="Edit"
+                                        >
+                                            <PencilSquareIcon className="w-4 h-4" />
+                                        </button>
 
                                         {/* Copy Button */}
-                                        <ToolTip title="Copy" event={() => onCopy(note)}>
-                                            <ContentCopyIcon />
-                                        </ToolTip>
+                                        <button
+                                            onClick={() => onCopy(note)}
+                                            className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-base-content rounded-lg"
+                                            title="Copy"
+                                        >
+                                            <DocumentDuplicateIcon className="w-4 h-4" />
+                                        </button>
 
                                         {/* Delete Button */}
-                                        {currentView == 'notes' && (
-                                            <>
-                                                <ToolTip title="Delete" event={() => onDelete(note)}>
-                                                    <DeleteIcon />
-                                                </ToolTip>
-                                            </>
+                                        {currentView === 'notes' && (
+                                            <button
+                                                onClick={() => onDelete(note)}
+                                                className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-error rounded-lg"
+                                                title="Delete"
+                                            >
+                                                <TrashIcon className="w-4 h-4" />
+                                            </button>
                                         )}
 
                                         {/* Preview Attachment Button */}
                                         {note.fileDetails !== null && canPreviewFile(note.fileDetails.displayFileName) && (
-                                            <ToolTip title="Preview Attachment" event={() => handlePreviewAttachment(note.fileDetails)}>
-                                                <VisibilityIcon />
-                                            </ToolTip>
+                                            <button
+                                                onClick={() => handlePreviewAttachment(note.fileDetails)}
+                                                className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-primary rounded-lg"
+                                                title="Preview Attachment"
+                                            >
+                                                <EyeIcon className="w-4 h-4" />
+                                            </button>
                                         )}
 
                                         {/* Download Button */}
                                         {note.fileDetails !== null && (
-                                            <ToolTip title="Download" event={() => onDownload ? onDownload(note) : handleDownloadAttachment(note.fileDetails)}>
-                                                <DownloadIcon />
-                                            </ToolTip>
+                                            <button
+                                                onClick={() => onDownload ? onDownload(note) : handleDownloadAttachment(note.fileDetails)}
+                                                className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-primary rounded-lg"
+                                                title="Download"
+                                            >
+                                                <ArrowDownTrayIcon className="w-4 h-4" />
+                                            </button>
                                         )}
-
 
                                         {currentView === 'recycled' && (
                                             <>
                                                 {/* Restore Button */}
                                                 {onRestore && (
-                                                    <ToolTip title="Restore Note" event={() => onRestore(note)}>
-                                                        <RestoreFromTrashIcon />
-                                                    </ToolTip>
+                                                    <button
+                                                        onClick={() => onRestore(note)}
+                                                        className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-success rounded-lg"
+                                                        title="Restore Note"
+                                                    >
+                                                        <ArrowPathIcon className="w-4 h-4" />
+                                                    </button>
                                                 )}
 
                                                 {/* Permanent Delete Button */}
-                                                <ToolTip title="Delete Permanently" event={() => onDeletePermanently(note)}>
-                                                    <DeleteForeverIcon />
-                                                </ToolTip>
+                                                <button
+                                                    onClick={() => onDeletePermanently(note)}
+                                                    className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-error rounded-lg"
+                                                    title="Delete Permanently"
+                                                >
+                                                    <TrashIcon className="w-4 h-4" />
+                                                </button>
                                             </>
                                         )}
                                     </>
@@ -274,9 +300,9 @@ function NoteDetailModal({
                                 {/* Close Button */}
                                 <button
                                     onClick={handleClose}
-                                    className="p-2 text-red-700 hover:text-red-600 dark:hover:text-gray-300 transition-colors"
+                                    className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-base-content rounded-lg"
                                 >
-                                    <CloseIcon />
+                                    <XMarkIcon className="w-4 h-4" />
                                 </button>
                             </div>
                         </div>
@@ -285,7 +311,7 @@ function NoteDetailModal({
                             <form onSubmit={handleEditSubmit} className="space-y-4">
                                 {/* Title Field */}
                                 <div>
-                                    <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    <label htmlFor="edit-title" className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
                                         Title
                                     </label>
                                     <input
@@ -294,9 +320,7 @@ function NoteDetailModal({
                                         name="title"
                                         value={editNote.title}
                                         onChange={handleInputChange}
-                                        className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-3 focus:ring-green-600 focus:border-green-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${
-                                            editNote.title.trim() === '' ? 'border-gray-300' : 'border-green-600'
-                                        }`}
+                                        className="input input-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl focus:border-primary"
                                         placeholder="Enter note title"
                                         required
                                     />
@@ -304,31 +328,31 @@ function NoteDetailModal({
 
                                 {/* Category Selection */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
                                         Category
                                     </label>
                                     <div className="relative" ref={categoryDropdownRef}>
                                         <button
                                             type="button"
                                             onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                                            className={`w-full px-3 py-2 text-left border-1 rounded-lg focus:ring-3 focus:ring-green-600 focus:border-black dark:bg-gray-700 dark:border-gray-600 dark:text-white flex justify-between items-center ${editNote.category.name === 'Select Category' ? 'border-gray-300':'border-green-600'}`}
+                                            className="input input-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl flex justify-between items-center cursor-pointer focus:border-primary"
                                         >
-                                            <span className={editNote.category.id ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
+                                            <span className={editNote.category.id ? 'text-base-content' : 'text-base-content/40'}>
                                                 {editNote.category.name}
                                             </span>
-                                            <svg className={`w-4 h-4 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className={`w-4 h-4 text-base-content/50 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
 
                                         {isCategoryDropdownOpen && (
-                                            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto transition-all duration-200">
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-xl shadow-xl z-20 max-h-48 overflow-y-auto p-1.5">
                                                 {categories.map((category) => (
                                                     <button
                                                         key={category.id}
                                                         type="button"
                                                         onClick={() => handleCategorySelect(category)}
-                                                        className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+                                                        className="w-full px-3 py-2 text-left rounded-lg text-xs hover:bg-base-200 text-base-content transition"
                                                     >
                                                         {category.name}
                                                     </button>
@@ -340,7 +364,7 @@ function NoteDetailModal({
 
                                 {/* Description Field */}
                                 <div>
-                                    <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    <label htmlFor="edit-description" className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
                                         Description
                                     </label>
                                     <textarea
@@ -349,7 +373,7 @@ function NoteDetailModal({
                                         value={editNote.description}
                                         onChange={handleInputChange}
                                         rows={6}
-                                        className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 resize-none ${editNote.description.trim() === '' ? 'border-gray-300' : 'border-green-600'}`}
+                                        className="textarea textarea-bordered w-full bg-base-200/50 text-base-content text-sm rounded-xl focus:border-primary resize-none"
                                         placeholder="Enter note description"
                                         required
                                     />
@@ -357,34 +381,34 @@ function NoteDetailModal({
 
                                 {/* Attachment in Edit Mode */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                    <label className="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-1.5">
                                         Attachment
                                     </label>
 
                                     {/* Case 1: Note has an existing file and user is keeping it */}
                                     {note.fileDetails && attachmentMode === 'keep' && (
-                                        <div className="flex items-center justify-between p-3.5 rounded-xl border border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-950/20">
+                                        <div className="flex items-center justify-between p-3 rounded-xl border border-base-300 bg-base-200/40">
                                             <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400">
+                                                <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                                     <DocumentIcon className="w-5 h-5" />
                                                 </div>
                                                 <div className="min-w-0">
                                                     <div className="flex items-center gap-2">
-                                                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                                        <p className="text-xs font-semibold text-base-content truncate">
                                                             {note.fileDetails.displayFileName}
                                                         </p>
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                                        <span className="badge badge-success badge-xs">
                                                             Current file
                                                         </span>
                                                     </div>
                                                     {note.fileDetails.fileSize ? (
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                        <p className="text-[11px] text-base-content/50">
                                                             {formatFileSize(note.fileDetails.fileSize)}
                                                         </p>
                                                     ) : null}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2 shrink-0 ml-3">
+                                            <div className="flex items-center gap-1 shrink-0 ml-3">
                                                 <button
                                                     type="button"
                                                     onClick={() => {
@@ -392,7 +416,7 @@ function NoteDetailModal({
                                                         setFile(null);
                                                         setFilePreview(null);
                                                     }}
-                                                    className="btn btn-ghost btn-xs text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                                                    className="btn btn-ghost btn-xs text-primary rounded-lg"
                                                 >
                                                     Replace
                                                 </button>
@@ -403,7 +427,7 @@ function NoteDetailModal({
                                                         setFile(null);
                                                         setFilePreview(null);
                                                     }}
-                                                    className="btn btn-ghost btn-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                                                    className="btn btn-ghost btn-xs text-error rounded-lg"
                                                 >
                                                     Remove
                                                 </button>
@@ -413,12 +437,12 @@ function NoteDetailModal({
 
                                     {/* Case 2: User chose to remove existing attachment */}
                                     {note.fileDetails && attachmentMode === 'remove' && (
-                                        <div className="flex items-center justify-between p-3 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 text-red-700 dark:text-red-300">
-                                            <span className="text-sm">Attachment will be removed when updated.</span>
+                                        <div className="flex items-center justify-between p-3 rounded-xl border border-error/30 bg-error/10 text-error">
+                                            <span className="text-xs">Attachment will be removed when updated.</span>
                                             <button
                                                 type="button"
                                                 onClick={() => setAttachmentMode('keep')}
-                                                className="btn btn-ghost btn-xs text-blue-600 dark:text-blue-400"
+                                                className="btn btn-ghost btn-xs text-primary"
                                             >
                                                 Undo (Keep file)
                                             </button>
@@ -433,7 +457,7 @@ function NoteDetailModal({
                                                     type="file"
                                                     ref={fileInputRef}
                                                     onChange={handleFileChange}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-600 dark:file:text-gray-300"
+                                                    className="file-input file-input-bordered file-input-sm w-full bg-base-200/50 text-base-content rounded-xl"
                                                     accept="*/*"
                                                 />
                                                 {note.fileDetails && (
@@ -444,7 +468,7 @@ function NoteDetailModal({
                                                             setFile(null);
                                                             setFilePreview(null);
                                                         }}
-                                                        className="btn btn-ghost btn-sm text-gray-500 shrink-0"
+                                                        className="btn btn-ghost btn-sm text-base-content/60 shrink-0"
                                                     >
                                                         Cancel
                                                     </button>
@@ -452,17 +476,17 @@ function NoteDetailModal({
                                             </div>
 
                                             {filePreview && (
-                                                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                                                <div className="bg-base-200/40 rounded-xl p-3 border border-base-300">
                                                     <div className="flex items-center justify-between">
-                                                        <div className="flex items-center space-x-3">
-                                                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
-                                                                <DocumentIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                                        <div className="flex items-center space-x-3 min-w-0">
+                                                            <div className="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center shrink-0">
+                                                                <DocumentIcon className="w-5 h-5" />
                                                             </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                            <div className="min-w-0">
+                                                                <p className="text-xs font-medium text-base-content truncate">
                                                                     {filePreview.name}
                                                                 </p>
-                                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                <p className="text-[11px] text-base-content/50">
                                                                     {formatFileSize(filePreview.size)}
                                                                 </p>
                                                             </div>
@@ -470,9 +494,9 @@ function NoteDetailModal({
                                                         <button
                                                             type="button"
                                                             onClick={handleRemoveFile}
-                                                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                                            className="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10 rounded-lg"
                                                         >
-                                                            <CloseIcon className="w-4 h-4" />
+                                                            <XMarkIcon className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -482,26 +506,23 @@ function NoteDetailModal({
                                 </div>
 
                                 {/* Form Actions */}
-                                <div className="flex justify-end space-x-3 pt-4">
+                                <div className="flex justify-end gap-2 pt-3">
                                     <button
                                         type="button"
                                         onClick={() => setIsEditing(false)}
-                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+                                        className="btn btn-ghost btn-sm rounded-xl font-medium"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                        className="btn btn-primary btn-sm rounded-xl font-medium"
                                     >
                                         {isSubmitting ? (
                                             <>
-                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                Updating...
+                                                <span className="loading loading-spinner loading-xs" />
+                                                <span>Updating...</span>
                                             </>
                                         ) : (
                                             'Update Note'
@@ -513,23 +534,23 @@ function NoteDetailModal({
                             <div className="space-y-4">
                                 {/* Note Display */}
                                 <div>
-                                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{note.title}</h3>
-                                    <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-blue-900 dark:text-blue-300">
+                                    <h3 className="text-xl font-bold text-base-content mb-2 tracking-tight">{note.title}</h3>
+                                    <span className="badge badge-neutral badge-sm">
                                         {note.category?.name || note.categoryName || 'General'}
                                     </span>
                                 </div>
 
-                                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</h4>
-                                    <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+                                <div className="border-t border-base-200 pt-4">
+                                    <h4 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-2">Description</h4>
+                                    <p className="text-sm text-base-content/80 whitespace-pre-wrap leading-relaxed">
                                         {note.description}
                                     </p>
                                 </div>
 
                                 {note.fileDetails !== null && (
-                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attachment</h4>
-                                        <div className="flex items-center justify-between p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+                                    <div className="border-t border-base-200 pt-4">
+                                        <h4 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-2">Attachment</h4>
+                                        <div className="flex items-center justify-between p-3.5 rounded-xl border border-base-300 bg-base-200/30 hover:border-primary/40 transition-colors">
                                             <div 
                                                 className="flex items-center gap-3 cursor-pointer min-w-0 flex-1 group"
                                                 onClick={() => setFileActionItem({
@@ -538,39 +559,39 @@ function NoteDetailModal({
                                                     size: note.fileDetails.fileSize
                                                 })}
                                             >
-                                                <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 group-hover:bg-blue-200 dark:group-hover:bg-blue-900 transition-colors">
+                                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
                                                     <DocumentIcon className="w-5 h-5" />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                    <p className="text-xs font-semibold text-base-content truncate group-hover:text-primary transition-colors">
                                                         {note.fileDetails.displayFileName}
                                                     </p>
                                                     {note.fileDetails.fileSize ? (
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                        <p className="text-[11px] text-base-content/50">
                                                             {formatFileSize(note.fileDetails.fileSize)}
                                                         </p>
                                                     ) : null}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                                            <div className="flex items-center gap-1 shrink-0 ml-3">
                                                 {canPreviewFile(note.fileDetails.displayFileName) && (
                                                     <button
                                                         type="button"
                                                         onClick={() => handlePreviewAttachment(note.fileDetails)}
-                                                        className="btn btn-ghost btn-xs sm:btn-sm text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 gap-1"
+                                                        className="btn btn-ghost btn-xs text-primary gap-1"
                                                         title="Preview attachment"
                                                     >
-                                                        <EyeIcon className="w-4 h-4" />
+                                                        <EyeIcon className="w-3.5 h-3.5" />
                                                         <span className="hidden sm:inline">Preview</span>
                                                     </button>
                                                 )}
                                                 <button
                                                     type="button"
                                                     onClick={() => onDownload ? onDownload(note) : handleDownloadAttachment(note.fileDetails)}
-                                                    className="btn btn-ghost btn-xs sm:btn-sm text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 gap-1"
+                                                    className="btn btn-ghost btn-xs text-base-content/70 hover:text-base-content gap-1"
                                                     title="Download attachment"
                                                 >
-                                                    <ArrowDownTrayIcon className="w-4 h-4" />
+                                                    <ArrowDownTrayIcon className="w-3.5 h-3.5" />
                                                     <span className="hidden sm:inline">Download</span>
                                                 </button>
                                             </div>
@@ -578,16 +599,15 @@ function NoteDetailModal({
                                     </div>
                                 )}
 
-
-                                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="border-t border-base-200 pt-4">
+                                    <div className="grid grid-cols-2 gap-4 text-xs">
                                         <div>
-                                            <p className="text-gray-500 dark:text-gray-400">Created</p>
-                                            <p className="text-gray-900 dark:text-white">{formatDate(note.createdDate)}</p>
+                                            <p className="text-base-content/50">Created</p>
+                                            <p className="font-medium text-base-content/80 mt-0.5">{formatDate(note.createdDate)}</p>
                                         </div>
                                         <div>
-                                            <p className="text-gray-500 dark:text-gray-400">Last Updated</p>
-                                            <p className="text-gray-900 dark:text-white">{formatDate(note.updatedDate)}</p>
+                                            <p className="text-base-content/50">Last Updated</p>
+                                            <p className="font-medium text-base-content/80 mt-0.5">{formatDate(note.updatedDate)}</p>
                                         </div>
                                     </div>
                                 </div>

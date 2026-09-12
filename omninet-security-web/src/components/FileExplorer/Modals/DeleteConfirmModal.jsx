@@ -1,4 +1,5 @@
 import React from 'react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 const DeleteConfirmModal = ({ items, onConfirm, onCancel }) => {
   const itemCount = items.length;
@@ -6,35 +7,37 @@ const DeleteConfirmModal = ({ items, onConfirm, onCancel }) => {
   const firstItem = items[0];
 
   return (
-    <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50" onClick={onCancel}>
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Confirm Delete</h3>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4" onClick={onCancel}>
+      <div className="bg-base-100 border border-base-300 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="px-6 py-4 border-b border-base-300 flex items-center justify-between">
+          <h3 className="text-base font-semibold text-base-content">Confirm Delete</h3>
         </div>
         
-        <div className="px-6 py-4">
-          <div className="flex items-start gap-4">
-            <div className="text-3xl">⚠️</div>
+        <div className="p-6">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-error/10 text-error shrink-0">
+              <ExclamationTriangleIcon className="w-6 h-6" />
+            </div>
             <div className="flex-1">
               {isMultiple ? (
-                <p className="text-gray-700 mb-3">
-                  Are you sure you want to delete these <strong className="font-semibold">{itemCount}</strong> items?
+                <p className="text-sm text-base-content mb-2">
+                  Are you sure you want to delete these <strong className="font-semibold text-base-content">{itemCount}</strong> items?
                 </p>
               ) : (
-                <p className="text-gray-700 mb-3">
-                  Are you sure you want to delete <strong className="font-semibold">"{firstItem.name}"</strong>?
+                <p className="text-sm text-base-content mb-2">
+                  Are you sure you want to delete <strong className="font-semibold text-base-content">"{firstItem?.name}"</strong>?
                 </p>
               )}
-              <p className="text-sm text-red-600 font-medium">
+              <p className="text-xs text-error font-medium">
                 This action cannot be undone.
               </p>
             </div>
           </div>
           
           {isMultiple && itemCount <= 5 && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-md">
-              <p className="text-sm font-medium text-gray-700 mb-2">Items to delete:</p>
-              <ul className="text-sm text-gray-600 space-y-1">
+            <div className="mt-4 p-3 bg-base-200 rounded-xl border border-base-300">
+              <p className="text-xs font-medium text-base-content/70 mb-1.5">Items to delete:</p>
+              <ul className="text-xs text-base-content/80 space-y-1">
                 {items.map(item => (
                   <li key={item.path} className="truncate">• {item.name}</li>
                 ))}
@@ -43,28 +46,30 @@ const DeleteConfirmModal = ({ items, onConfirm, onCancel }) => {
           )}
           
           {isMultiple && itemCount > 5 && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-md">
-              <p className="text-sm font-medium text-gray-700 mb-2">Items to delete:</p>
-              <ul className="text-sm text-gray-600 space-y-1">
+            <div className="mt-4 p-3 bg-base-200 rounded-xl border border-base-300">
+              <p className="text-xs font-medium text-base-content/70 mb-1.5">Items to delete:</p>
+              <ul className="text-xs text-base-content/80 space-y-1">
                 {items.slice(0, 3).map(item => (
                   <li key={item.path} className="truncate">• {item.name}</li>
                 ))}
-                <li className="text-gray-500 italic">... and {itemCount - 3} more items</li>
+                <li className="text-base-content/50 italic text-[11px]">... and {itemCount - 3} more items</li>
               </ul>
             </div>
           )}
         </div>
         
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+        <div className="px-6 py-3.5 border-t border-base-300 bg-base-200/50 flex justify-end gap-2.5">
           <button 
+            type="button"
             onClick={onCancel} 
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+            className="btn btn-ghost btn-sm text-xs font-medium"
           >
             Cancel
           </button>
           <button 
+            type="button"
             onClick={onConfirm} 
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+            className="btn btn-error btn-sm text-xs font-semibold"
           >
             Delete
           </button>

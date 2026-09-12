@@ -1,22 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  FaArrowLeft, 
-  FaArrowRight, 
-  FaArrowUp, 
-  FaHome,
-  FaSearch,
-  FaTh,
-  FaList,
-  FaPlus,
-  FaUpload,
-  FaSync,
-  FaBars,
-  FaSort,
-  FaSortAlphaDown,
-  FaSortAlphaUp,
-  FaSortNumericDown,
-  FaSortNumericUp
-} from 'react-icons/fa';
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ArrowUpIcon,
+  HomeIcon,
+  MagnifyingGlassIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
+  PlusIcon,
+  ArrowUpTrayIcon,
+  ArrowPathIcon,
+  Bars3Icon,
+  ArrowsUpDownIcon,
+  ChevronRightIcon,
+} from '@heroicons/react/24/outline';
 
 const Toolbar = ({
   canGoBack,
@@ -38,12 +35,11 @@ const Toolbar = ({
   onToggleSidebar,
   onCreateFolder,
   onUpload,
-  onRefresh
+  onRefresh,
 }) => {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const sortMenuRef = useRef(null);
 
-  // Close sort menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (sortMenuRef.current && !sortMenuRef.current.contains(event.target)) {
@@ -54,13 +50,12 @@ const Toolbar = ({
     if (showSortMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showSortMenu]);
 
-  const breadcrumbParts = currentPath ? currentPath.split('/') : [];
+  const breadcrumbParts = currentPath ? currentPath.split('/').filter(Boolean) : [];
 
   const handleBreadcrumbClick = (index) => {
     if (index === -1) {
@@ -71,208 +66,229 @@ const Toolbar = ({
     }
   };
 
-  const getSortIcon = () => {
-    if (sortBy === 'name') {
-      return sortOrder === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />;
-    } else if (sortBy === 'size' || sortBy === 'modified') {
-      return sortOrder === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />;
-    }
-    return <FaSort />;
-  };
-
   return (
-    <div className="flex items-center p-3 bg-white border-b border-gray-200 shadow-sm gap-3 flex-wrap">
-      {/* Navigation Section */}
-      <div className="flex items-center gap-1">
+    <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-base-100 border-b border-base-300 flex-wrap transition-colors">
+      {/* Left: Nav Buttons & Breadcrumb */}
+      <div className="flex items-center gap-2 flex-1 min-w-[280px]">
+        {/* Toggle Sidebar */}
         <button
-          className="flex items-center justify-center p-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200"
+          className="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-base-content"
           onClick={onToggleSidebar}
           title="Toggle Sidebar"
+          type="button"
         >
-          <FaBars />
+          <Bars3Icon className="w-4 h-4" />
         </button>
 
-        <button
-          className="flex items-center justify-center p-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={onNavigateBack}
-          disabled={!canGoBack}
-          title="Back"
-        >
-          <FaArrowLeft />
-        </button>
-
-        <button
-          className="flex items-center justify-center p-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={onNavigateForward}
-          disabled={!canGoForward}
-          title="Forward"
-        >
-          <FaArrowRight />
-        </button>
-
-        <button
-          className="flex items-center justify-center p-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={onNavigateUp}
-          disabled={!canGoUp}
-          title="Up"
-        >
-          <FaArrowUp />
-        </button>
-
-        <button
-          className="flex items-center justify-center p-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200"
-          onClick={() => onNavigateTo('')}
-          title="Home"
-        >
-          <FaHome />
-        </button>
-      </div>
-
-      {/* Address Bar */}
-      <div className="flex items-center flex-1 min-w-[200px]">
-        <div className="flex items-center bg-white border border-gray-300 rounded px-3 py-1.5 overflow-hidden">
+        {/* Back / Forward / Up / Home Group */}
+        <div className="flex items-center gap-0.5 bg-base-200/60 rounded-xl p-0.5 border border-base-300/60">
           <button
-            className="bg-transparent border-none text-blue-600 cursor-pointer px-2 py-1 rounded text-sm transition-colors hover:bg-blue-50"
+            className="btn btn-ghost btn-xs btn-square text-base-content/70 disabled:opacity-30"
+            onClick={onNavigateBack}
+            disabled={!canGoBack}
+            title="Back"
+            type="button"
+          >
+            <ArrowLeftIcon className="w-3.5 h-3.5" />
+          </button>
+          <button
+            className="btn btn-ghost btn-xs btn-square text-base-content/70 disabled:opacity-30"
+            onClick={onNavigateForward}
+            disabled={!canGoForward}
+            title="Forward"
+            type="button"
+          >
+            <ArrowRightIcon className="w-3.5 h-3.5" />
+          </button>
+          <button
+            className="btn btn-ghost btn-xs btn-square text-base-content/70 disabled:opacity-30"
+            onClick={onNavigateUp}
+            disabled={!canGoUp}
+            title="Up one level"
+            type="button"
+          >
+            <ArrowUpIcon className="w-3.5 h-3.5" />
+          </button>
+          <button
+            className="btn btn-ghost btn-xs btn-square text-base-content/70"
+            onClick={() => onNavigateTo('')}
+            title="Root"
+            type="button"
+          >
+            <HomeIcon className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Address / Breadcrumbs Bar */}
+        <nav aria-label="Breadcrumb" className="flex items-center bg-base-200/50 border border-base-300 rounded-xl px-2.5 py-1 text-xs max-w-md overflow-x-auto custom-scrollbar">
+          <button
+            type="button"
+            className="text-base-content/70 hover:text-primary font-medium transition-colors px-1 py-0.5 rounded"
             onClick={() => handleBreadcrumbClick(-1)}
           >
             Root
           </button>
           {breadcrumbParts.map((part, index) => (
             <React.Fragment key={index}>
-              <span className="text-gray-600 mx-1">/</span>
+              <ChevronRightIcon className="w-3 h-3 text-base-content/40 shrink-0 mx-0.5" />
               <button
-                className="bg-transparent border-none text-blue-600 cursor-pointer px-2 py-1 rounded text-sm transition-colors hover:bg-blue-50"
+                type="button"
+                className={`px-1 py-0.5 rounded transition-colors font-medium truncate max-w-[120px] ${
+                  index === breadcrumbParts.length - 1
+                    ? 'text-base-content font-semibold'
+                    : 'text-base-content/70 hover:text-primary'
+                }`}
                 onClick={() => handleBreadcrumbClick(index)}
+                title={part}
               >
                 {part}
               </button>
             </React.Fragment>
           ))}
-        </div>
+        </nav>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center min-w-[200px]">
+      {/* Right: Search, Actions, View Mode & Sort */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Search Input */}
         <div className="relative flex items-center">
-          <FaSearch className="absolute left-3 text-gray-400 z-10" />
+          <MagnifyingGlassIcon className="w-4 h-4 text-base-content/40 absolute left-2.5 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search files and folders..."
+            placeholder="Search files..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 pr-3 py-2 border border-gray-300 rounded text-sm w-52 transition-colors focus:outline-none focus:border-blue-500"
+            className="input input-sm input-bordered rounded-xl bg-base-200/50 border-base-300 pl-8 pr-3 w-40 sm:w-52 text-xs focus:bg-base-100 transition-all"
           />
         </div>
-      </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-2">
+        {/* Create Folder Button */}
         <button
-          className="flex items-center gap-1.5 px-3 py-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200"
+          type="button"
+          className="btn btn-ghost btn-sm border border-base-300 rounded-xl gap-1.5 text-xs font-medium text-base-content hover:bg-base-200"
           onClick={onCreateFolder}
           title="New Folder"
         >
-          <FaPlus />
-          <span>New Folder</span>
+          <PlusIcon className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">New Folder</span>
         </button>
 
+        {/* Upload Button */}
         <button
-          className="flex items-center gap-1.5 px-3 py-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200"
+          type="button"
+          className="btn btn-primary btn-sm rounded-xl gap-1.5 text-xs font-semibold shadow-xs"
           onClick={onUpload}
           title="Upload Files"
         >
-          <FaUpload />
+          <ArrowUpTrayIcon className="w-3.5 h-3.5" />
           <span>Upload</span>
         </button>
 
+        {/* Refresh Button */}
         <button
-          className="flex items-center justify-center p-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200"
+          type="button"
+          className="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-base-content"
           onClick={onRefresh}
           title="Refresh"
         >
-          <FaSync />
+          <ArrowPathIcon className="w-4 h-4" />
         </button>
 
         {/* View Mode Toggle */}
-        <div className="flex border border-gray-300 rounded overflow-hidden">
+        <div className="join border border-base-300 rounded-xl bg-base-200/50 p-0.5">
           <button
-            className={`flex items-center justify-center p-2 border-none text-sm transition-colors ${
-              viewMode === 'grid' 
-                ? 'bg-blue-50 text-blue-700' 
-                : 'bg-transparent text-gray-700 hover:bg-gray-100'
+            type="button"
+            className={`btn btn-xs btn-square border-0 join-item ${
+              viewMode === 'grid'
+                ? 'bg-base-100 text-primary shadow-xs'
+                : 'btn-ghost text-base-content/60'
             }`}
             onClick={() => onViewModeChange('grid')}
             title="Grid View"
           >
-            <FaTh />
+            <Squares2X2Icon className="w-3.5 h-3.5" />
           </button>
           <button
-            className={`flex items-center justify-center p-2 border-none text-sm transition-colors ${
-              viewMode === 'list' 
-                ? 'bg-blue-50 text-blue-700' 
-                : 'bg-transparent text-gray-700 hover:bg-gray-100'
+            type="button"
+            className={`btn btn-xs btn-square border-0 join-item ${
+              viewMode === 'list'
+                ? 'bg-base-100 text-primary shadow-xs'
+                : 'btn-ghost text-base-content/60'
             }`}
             onClick={() => onViewModeChange('list')}
             title="List View"
           >
-            <FaList />
+            <ListBulletIcon className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Sort Menu */}
         <div className="relative" ref={sortMenuRef}>
           <button
-            className="flex items-center justify-center p-2 border border-transparent bg-transparent rounded hover:bg-gray-100 hover:border-gray-300 cursor-pointer text-sm text-gray-700 transition-all duration-200"
+            type="button"
+            className="btn btn-ghost btn-sm btn-square border border-base-300 rounded-xl text-base-content/70 hover:text-base-content"
             onClick={() => setShowSortMenu(!showSortMenu)}
             title="Sort Options"
           >
-            {getSortIcon()}
+            <ArrowsUpDownIcon className="w-4 h-4" />
           </button>
+
           {showSortMenu && (
-            <div className="absolute top-full right-0 bg-white border border-gray-300 rounded shadow-lg z-50 min-w-[150px]">
+            <div className="absolute top-full right-0 mt-1.5 w-44 rounded-xl border border-base-300 bg-base-100 p-1.5 shadow-xl z-50 text-xs animate-fadeIn">
+              <div className="px-2 py-1 text-[11px] font-semibold text-base-content/50 uppercase tracking-wider">
+                Sort by
+              </div>
               <button
-                className={`block w-full px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 ${
-                  sortBy === 'name' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                type="button"
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
+                  sortBy === 'name' ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200 text-base-content'
                 }`}
                 onClick={() => {
                   onSortChange('name', sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc');
                   setShowSortMenu(false);
                 }}
               >
-                Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <span>Name</span>
+                {sortBy === 'name' && <span>{sortOrder === 'asc' ? 'A→Z' : 'Z→A'}</span>}
               </button>
               <button
-                className={`block w-full px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 ${
-                  sortBy === 'size' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                type="button"
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
+                  sortBy === 'size' ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200 text-base-content'
                 }`}
                 onClick={() => {
                   onSortChange('size', sortBy === 'size' && sortOrder === 'asc' ? 'desc' : 'asc');
                   setShowSortMenu(false);
                 }}
               >
-                Size {sortBy === 'size' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <span>Size</span>
+                {sortBy === 'size' && <span>{sortOrder === 'asc' ? 'Small' : 'Large'}</span>}
               </button>
               <button
-                className={`block w-full px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 ${
-                  sortBy === 'modified' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                type="button"
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
+                  sortBy === 'modified' ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200 text-base-content'
                 }`}
                 onClick={() => {
                   onSortChange('modified', sortBy === 'modified' && sortOrder === 'asc' ? 'desc' : 'asc');
                   setShowSortMenu(false);
                 }}
               >
-                Modified {sortBy === 'modified' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <span>Date Modified</span>
+                {sortBy === 'modified' && <span>{sortOrder === 'asc' ? 'Oldest' : 'Newest'}</span>}
               </button>
               <button
-                className={`block w-full px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 ${
-                  sortBy === 'type' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                type="button"
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
+                  sortBy === 'type' ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-base-200 text-base-content'
                 }`}
                 onClick={() => {
                   onSortChange('type', sortBy === 'type' && sortOrder === 'asc' ? 'desc' : 'asc');
                   setShowSortMenu(false);
                 }}
               >
-                Type {sortBy === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <span>Type</span>
+                {sortBy === 'type' && <span>{sortOrder === 'asc' ? 'A→Z' : 'Z→A'}</span>}
               </button>
             </div>
           )}

@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
-import { FaFolder, FaFile, FaImage, FaVideo, FaMusic, FaFileAlt, FaFileArchive } from 'react-icons/fa';
+import {
+  FolderIcon,
+  DocumentIcon,
+  PhotoIcon,
+  FilmIcon,
+  SpeakerWaveIcon,
+  DocumentTextIcon,
+  ArchiveBoxIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 import { storageClient } from '../../../services/storageClient';
-// import './MainPane.css';
 
 const getFileIcon = (fileName, type) => {
-  if (type === 'folder') return <FaFolder className="text-yellow-500 text-3xl" />;
-  
+  if (type === 'folder') {
+    return <FolderIcon className="w-9 h-9 text-primary transition-transform group-hover:scale-105" />;
+  }
+
   const extension = fileName.split('.').pop()?.toLowerCase();
-  
+
   switch (extension) {
     case 'jpg':
     case 'jpeg':
@@ -15,30 +25,45 @@ const getFileIcon = (fileName, type) => {
     case 'gif':
     case 'bmp':
     case 'webp':
-      return <FaImage className="text-green-500 text-3xl" />;
+    case 'svg':
+      return <PhotoIcon className="w-8 h-8 text-emerald-500/90 transition-transform group-hover:scale-105" />;
     case 'mp4':
     case 'avi':
     case 'mov':
     case 'wmv':
     case 'flv':
-      return <FaVideo className="text-red-500 text-3xl" />;
+    case 'webm':
+      return <FilmIcon className="w-8 h-8 text-rose-500/90 transition-transform group-hover:scale-105" />;
     case 'mp3':
     case 'wav':
     case 'flac':
     case 'aac':
-      return <FaMusic className="text-purple-500 text-3xl" />;
+    case 'ogg':
+      return <SpeakerWaveIcon className="w-8 h-8 text-purple-500/90 transition-transform group-hover:scale-105" />;
     case 'txt':
+    case 'md':
+    case 'json':
+    case 'js':
+    case 'jsx':
+    case 'ts':
+    case 'tsx':
+    case 'html':
+    case 'css':
+    case 'py':
+    case 'java':
+    case 'go':
     case 'doc':
     case 'docx':
     case 'pdf':
-      return <FaFileAlt className="text-blue-500 text-3xl" />;
+      return <DocumentTextIcon className="w-8 h-8 text-sky-500/90 transition-transform group-hover:scale-105" />;
     case 'zip':
     case 'rar':
     case '7z':
     case 'tar':
-      return <FaFileArchive className="text-orange-500 text-3xl" />;
+    case 'gz':
+      return <ArchiveBoxIcon className="w-8 h-8 text-amber-500/90 transition-transform group-hover:scale-105" />;
     default:
-      return <FaFile className="text-gray-500 text-3xl" />;
+      return <DocumentIcon className="w-8 h-8 text-base-content/50 transition-transform group-hover:scale-105" />;
   }
 };
 
@@ -51,72 +76,28 @@ const formatFileSize = (bytes) => {
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
-  return new Date(dateString).toLocaleString();
+  return new Date(dateString).toLocaleDateString([], {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 };
 
 const GridView = ({ items, selectedItems, onItemSelect, onItemDoubleClick, onContextMenu }) => {
-  const isSelected = (item) => selectedItems.some(selected => selected.path === item.path);
+  const isSelected = (item) => selectedItems.some((selected) => selected.path === item.path);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 p-4">
-      {items.map((item, index) => (
-        <div
-          key={item.path}
-          data-file-item="true"
-          className={`flex flex-col items-center p-3 rounded-lg border-2 cursor-pointer transition-all hover:bg-gray-50 ${
-            isSelected(item) ? 'border-blue-500 bg-blue-50' : 'border-transparent hover:border-gray-200'
-          }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onItemSelect(item, index, e);
-          }}
-          onDoubleClick={(e) => {
-            e.stopPropagation();
-            onItemDoubleClick(item);
-          }}
-          onContextMenu={(e) => {
-            e.stopPropagation();
-            onContextMenu(e, item);
-          }}
-        >
-          <div className="mb-2">
-            {getFileIcon(item.name, item.type)}
-          </div>
-          <div className="text-sm text-center w-full">
-            <div className="font-medium text-gray-900 truncate" title={item.name}>
-              {item.name}
-            </div>
-            {item.type !== 'folder' && (
-              <div className="text-xs text-gray-500 mt-1">
-                {formatFileSize(item.size)}
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const ListView = ({ items, selectedItems, onItemSelect, onItemDoubleClick, onContextMenu }) => {
-  const isSelected = (item) => selectedItems.some(selected => selected.path === item.path);
-
-  return (
-    <div className="flex flex-col">
-      <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700">
-        <div className="col-span-5">Name</div>
-        <div className="col-span-2">Size</div>
-        <div className="col-span-2">Type</div>
-        <div className="col-span-3">Modified</div>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto">
-        {items.map((item, index) => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3 p-4">
+      {items.map((item, index) => {
+        const selected = isSelected(item);
+        return (
           <div
             key={item.path}
             data-file-item="true"
-            className={`grid grid-cols-12 gap-4 px-4 py-3 border-b border-gray-100 cursor-pointer transition-colors hover:bg-gray-50 ${
-              isSelected(item) ? 'bg-blue-50 border-blue-200' : ''
+            className={`group flex flex-col items-center p-3.5 rounded-2xl border transition-all duration-150 cursor-pointer text-center select-none ${
+              selected
+                ? 'bg-primary/10 border-primary shadow-xs ring-1 ring-primary/30'
+                : 'bg-base-100 border-base-300/70 hover:border-primary/40 hover:bg-base-200/50 hover:shadow-xs'
             }`}
             onClick={(e) => {
               e.stopPropagation();
@@ -131,23 +112,84 @@ const ListView = ({ items, selectedItems, onItemSelect, onItemDoubleClick, onCon
               onContextMenu(e, item);
             }}
           >
-            <div className="col-span-5 flex items-center gap-3 min-w-0">
-              <div className="flex-shrink-0">
-                {getFileIcon(item.name, item.type)}
+            <div className="mb-2.5 flex items-center justify-center h-10">
+              {getFileIcon(item.name, item.type)}
+            </div>
+            <div className="w-full">
+              <div
+                className={`text-xs font-medium truncate transition-colors ${
+                  selected ? 'text-primary font-semibold' : 'text-base-content group-hover:text-primary'
+                }`}
+                title={item.name}
+              >
+                {item.name}
               </div>
-              <span className="text-sm text-gray-900 truncate">{item.name}</span>
-            </div>
-            <div className="col-span-2 flex items-center text-sm text-gray-600">
-              {item.type === 'folder' ? '-' : formatFileSize(item.size)}
-            </div>
-            <div className="col-span-2 flex items-center text-sm text-gray-600">
-              {item.type === 'folder' ? 'Folder' : item.name.split('.').pop()?.toUpperCase() || 'File'}
-            </div>
-            <div className="col-span-3 flex items-center text-sm text-gray-600">
-              {formatDate(item.lastModified)}
+              <div className="text-[11px] text-base-content/50 mt-0.5">
+                {item.type === 'folder' ? 'Folder' : formatFileSize(item.size)}
+              </div>
             </div>
           </div>
-        ))}
+        );
+      })}
+    </div>
+  );
+};
+
+const ListView = ({ items, selectedItems, onItemSelect, onItemDoubleClick, onContextMenu }) => {
+  const isSelected = (item) => selectedItems.some((selected) => selected.path === item.path);
+
+  return (
+    <div className="flex flex-col select-none">
+      <div className="grid grid-cols-12 gap-4 px-4 py-2.5 bg-base-200/50 border-b border-base-300 text-[11px] font-semibold text-base-content/50 uppercase tracking-wider">
+        <div className="col-span-6 sm:col-span-5">Name</div>
+        <div className="col-span-2 hidden sm:block">Size</div>
+        <div className="col-span-2 hidden sm:block">Type</div>
+        <div className="col-span-6 sm:col-span-3 text-right sm:text-left">Modified</div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto divide-y divide-base-300/40">
+        {items.map((item, index) => {
+          const selected = isSelected(item);
+          return (
+            <div
+              key={item.path}
+              data-file-item="true"
+              className={`grid grid-cols-12 gap-4 px-4 py-2.5 cursor-pointer transition-colors text-xs items-center ${
+                selected
+                  ? 'bg-primary/10 text-primary font-semibold'
+                  : 'hover:bg-base-200/50 text-base-content'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onItemSelect(item, index, e);
+              }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                onItemDoubleClick(item);
+              }}
+              onContextMenu={(e) => {
+                e.stopPropagation();
+                onContextMenu(e, item);
+              }}
+            >
+              <div className="col-span-6 sm:col-span-5 flex items-center gap-2.5 min-w-0">
+                <div className="shrink-0 flex items-center">
+                  {getFileIcon(item.name, item.type)}
+                </div>
+                <span className="truncate" title={item.name}>{item.name}</span>
+              </div>
+              <div className="col-span-2 hidden sm:block text-base-content/60">
+                {item.type === 'folder' ? '—' : formatFileSize(item.size)}
+              </div>
+              <div className="col-span-2 hidden sm:block text-base-content/60 uppercase text-[11px]">
+                {item.type === 'folder' ? 'Folder' : item.name.split('.').pop() || 'File'}
+              </div>
+              <div className="col-span-6 sm:col-span-3 text-right sm:text-left text-base-content/60 text-[11px]">
+                {formatDate(item.lastModified)}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -335,10 +377,10 @@ const MainPane = ({
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
-          <span className="text-gray-600">Loading...</span>
+      <div className="flex-1 flex items-center justify-center bg-base-100">
+        <div className="flex flex-col items-center gap-3">
+          <span className="loading loading-spinner loading-lg text-primary" />
+          <span className="text-xs text-base-content/60 font-medium">Loading folder...</span>
         </div>
       </div>
     );
@@ -346,11 +388,13 @@ const MainPane = ({
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white">
+      <div className="flex-1 flex items-center justify-center bg-base-100">
         <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Contents</h3>
-          <p className="text-gray-600">{error}</p>
+          <div className="flex justify-center mb-4 text-warning">
+            <ExclamationTriangleIcon className="w-12 h-12" />
+          </div>
+          <h3 className="text-lg font-semibold text-base-content mb-2">Error Loading Contents</h3>
+          <p className="text-base-content/60 text-sm">{error}</p>
         </div>
       </div>
     );
@@ -358,7 +402,7 @@ const MainPane = ({
 
   return (
     <div 
-      className={`flex-1 bg-white overflow-hidden relative ${isDragOver ? 'bg-blue-50' : ''}`}
+      className={`flex-1 bg-base-100 overflow-hidden relative ${isDragOver ? 'bg-primary/5' : ''}`}
       onClick={handleMainPaneClick}
       onContextMenu={handleMainPaneContextMenu}
       onDragEnter={handleDragEnter}
@@ -367,17 +411,19 @@ const MainPane = ({
       onDrop={handleDrop}
     >
       {isDragOver && (
-        <div className="absolute inset-0 bg-blue-100 bg-opacity-50 border-2 border-dashed border-blue-400 z-10 flex items-center justify-center">
+        <div className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary/40 z-10 flex items-center justify-center backdrop-blur-xs">
           <div className="text-center">
-            <div className="text-4xl mb-2">📁</div>
-            <p className="text-lg font-semibold text-blue-700">Drop files here to upload</p>
+            <div className="flex justify-center mb-2 text-primary">
+              <FolderIcon className="w-10 h-10" />
+            </div>
+            <p className="text-sm font-semibold text-primary">Drop files here to upload</p>
           </div>
         </div>
       )}
 
       {uploadingFiles.length > 0 && (
-        <div className="absolute top-4 right-4 z-20 bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm">
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Uploading Files</h3>
+        <div className="absolute top-4 right-4 z-20 bg-base-100 border border-base-300 rounded-xl shadow-lg p-4 max-w-sm">
+          <h3 className="text-sm font-semibold text-base-content mb-2">Uploading Files</h3>
           <div className="space-y-2 max-h-32 overflow-y-auto">
             {uploadingFiles.map((file, index) => (
               <div key={index} className="text-xs">
@@ -386,25 +432,25 @@ const MainPane = ({
                     {file.name}
                   </span>
                   <span className={`text-xs ${
-                    file.status === 'completed' ? 'text-green-600' :
-                    file.status === 'failed' ? 'text-red-600' :
-                    'text-blue-600'
+                    file.status === 'completed' ? 'text-success' :
+                    file.status === 'failed' ? 'text-error' :
+                    'text-primary'
                   }`}>
-                    {file.status === 'completed' ? '✓' :
-                     file.status === 'failed' ? '✗' :
+                    {file.status === 'completed' ? 'Uploaded' :
+                     file.status === 'failed' ? 'Failed' :
                      `${Math.round(file.progress)}%`}
                   </span>
                 </div>
                 {file.status === 'uploading' && (
-                  <div className="w-full bg-gray-200 rounded-full h-1">
+                  <div className="w-full bg-base-200 rounded-full h-1">
                     <div 
-                      className="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                      className="bg-primary h-1 rounded-full transition-all duration-300"
                       style={{ width: `${file.progress}%` }}
                     />
                   </div>
                 )}
                 {file.status === 'failed' && file.error && (
-                  <div className="text-red-500 text-xs mt-1 truncate" title={file.error}>
+                  <div className="text-error text-xs mt-1 truncate" title={file.error}>
                     {file.error}
                   </div>
                 )}
@@ -418,9 +464,11 @@ const MainPane = ({
         {items.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="text-6xl mb-4">📁</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">This folder is empty</h3>
-              <p className="text-gray-600">Drag files here or use the toolbar to add content</p>
+              <div className="flex justify-center mb-3 text-base-content/30">
+                <FolderIcon className="w-14 h-14" />
+              </div>
+              <h3 className="text-base font-semibold text-base-content mb-1">This folder is empty</h3>
+              <p className="text-sm text-base-content/50">Drag files here or use the toolbar to add content</p>
             </div>
           </div>
         ) : viewMode === 'grid' ? (

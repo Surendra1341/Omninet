@@ -569,7 +569,7 @@ const FileExplorer = () => {
   }, [handleKeyDown]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 font-sans" onClick={closeContextMenu}>
+    <div className="flex flex-col h-full w-full bg-base-100 text-base-content overflow-hidden select-none" onClick={closeContextMenu}>
       <Toolbar
         canGoBack={historyIndex > 0}
         canGoForward={historyIndex < pathHistory.length - 1}

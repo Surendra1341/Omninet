@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import Lenis from 'lenis';
 import { useAuthStore } from './store/authStore';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage/LoginPage';
@@ -15,6 +16,28 @@ function App() {
   useEffect(() => {
     checkAuthStatus();
   }, [checkAuthStatus]);
+
+  // Global Lenis smooth scrolling
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.0,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 1.2,
+    });
+
+    let frame;
+    function raf(time) {
+      lenis.raf(time);
+      frame = requestAnimationFrame(raf);
+    }
+    frame = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      lenis.destroy();
+    };
+  }, []);
 
   if (isLoading) {
     return (

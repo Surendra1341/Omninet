@@ -1,5 +1,10 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { FaFolder, FaFolderOpen, FaChevronRight, FaChevronDown } from 'react-icons/fa';
+import {
+  FolderIcon,
+  FolderOpenIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
+} from '@heroicons/react/24/outline';
 import { storageClient } from '../../../services/storageClient';
 
 const FolderTreeNode = ({ node, currentPath, onNavigate, level = 0 }) => {
@@ -18,8 +23,7 @@ const FolderTreeNode = ({ node, currentPath, onNavigate, level = 0 }) => {
       try {
         const result = await storageClient.getContents(node.path);
         if (result.success) {
-          const folderChildren = (result.data.folders || []).map(folder => {
-            // Fix path construction to avoid double slashes
+          const folderChildren = (result.data.folders || []).map((folder) => {
             let folderPath;
             if (!node.path || node.path === '') {
               folderPath = folder.name;
@@ -27,11 +31,11 @@ const FolderTreeNode = ({ node, currentPath, onNavigate, level = 0 }) => {
               const cleanNodePath = node.path.replace(/\/+$/, '');
               folderPath = `${cleanNodePath}/${folder.name}`;
             }
-            
+
             return {
               name: folder.name,
               path: folderPath,
-              hasChildren: true
+              hasChildren: true,
             };
           });
           setChildren(folderChildren);
@@ -51,34 +55,50 @@ const FolderTreeNode = ({ node, currentPath, onNavigate, level = 0 }) => {
   };
 
   return (
-    <div className="folder-tree-node">
-      <div 
-        className={`flex items-center py-1 px-2 cursor-pointer rounded hover:bg-gray-100 ${isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700'}`}
-        style={{ paddingLeft: `${level * 16 + 8}px` }}
-        >
+    <div className="folder-tree-node text-xs">
+      <div
+        className={`group flex items-center py-1.5 px-2 cursor-pointer rounded-xl transition-colors ${
+          isActive
+            ? 'bg-primary/10 text-primary font-semibold'
+            : 'text-base-content/75 hover:bg-base-200/80 hover:text-base-content'
+        }`}
+        style={{ paddingLeft: `${level * 14 + 8}px` }}
+      >
         <button
-          className="flex items-center justify-center w-4 h-4 mr-2 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
+          type="button"
+          className="flex items-center justify-center w-4 h-4 mr-1 text-base-content/40 hover:text-base-content"
           onClick={handleToggle}
-          // disabled={!hasChildren || loading}
         >
           {loading ? (
-            <div className="w-3 h-3 border border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+            <span className="loading loading-spinner loading-xs text-primary" />
           ) : hasChildren ? (
-            isExpanded ? <FaChevronDown className="text-xs" /> : <FaChevronRight className="text-xs" />
+            isExpanded ? (
+              <ChevronDownIcon className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronRightIcon className="w-3.5 h-3.5" />
+            )
           ) : (
             <span className="w-3" />
           )}
         </button>
-        
-        <button className="cursor-pointer w-full flex items-center gap-2 text-sm hover:text-blue-600" onClick={handleClick}>
-          {isExpanded ? <FaFolderOpen className="text-yellow-500" /> : <FaFolder className="text-yellow-500" />}
+
+        <button
+          type="button"
+          className="w-full flex items-center gap-2 truncate text-left"
+          onClick={handleClick}
+        >
+          {isExpanded ? (
+            <FolderOpenIcon className="w-4 h-4 text-primary shrink-0" />
+          ) : (
+            <FolderIcon className="w-4 h-4 text-primary/80 shrink-0" />
+          )}
           <span className="truncate">{node.name}</span>
         </button>
       </div>
-      
+
       {isExpanded && children.length > 0 && (
-        <div className="ml-2">
-          {children.map(child => (
+        <div className="space-y-0.5 mt-0.5">
+          {children.map((child) => (
             <FolderTreeNode
               key={child.path}
               node={child}
@@ -102,10 +122,10 @@ const Sidebar = forwardRef(({ collapsed, currentPath, onNavigate }, ref) => {
     try {
       const result = await storageClient.getContents('');
       if (result.success) {
-        const folders = (result.data.folders || []).map(folder => ({
+        const folders = (result.data.folders || []).map((folder) => ({
           name: folder.name,
           path: folder.name,
-          hasChildren: true
+          hasChildren: true,
         }));
         setRootFolders(folders);
       }
@@ -116,9 +136,8 @@ const Sidebar = forwardRef(({ collapsed, currentPath, onNavigate }, ref) => {
     }
   };
 
-  // Expose refresh function to parent component
   useImperativeHandle(ref, () => ({
-    refresh: loadRootFolders
+    refresh: loadRootFolders,
   }));
 
   useEffect(() => {
@@ -126,49 +145,50 @@ const Sidebar = forwardRef(({ collapsed, currentPath, onNavigate }, ref) => {
   }, []);
 
   if (collapsed) {
-    return <div className="w-0 overflow-hidden border-r border-gray-200" />;
+    return <div className="w-0 overflow-hidden border-r border-base-300" />;
   }
 
   return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
-      <div className="px-4 py-3 border-b border-gray-200 bg-white">
-        <h3 className="text-sm font-semibold text-gray-900">Folders</h3>
+    <aside className="w-60 bg-base-200/40 border-r border-base-300 flex flex-col shrink-0 select-none transition-colors">
+      <div className="px-4 py-3 border-b border-base-300">
+        <h2 className="text-[11px] font-bold uppercase tracking-wider text-base-content/50">
+          Folders
+        </h2>
       </div>
-      
-      <div className="flex-1 overflow-y-auto p-2">
-        <div className="space-y-1">
-          <div className="folder-tree-node">
-            <div 
-              className={`flex items-center py-1 px-2 cursor-pointer rounded hover:bg-gray-100 ${currentPath === '' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'}`}
-              style={{ paddingLeft: '8px' }}
-            >
-              <span className="w-4 mr-2" />
-              <button className="flex items-center gap-2 text-sm hover:text-blue-600" onClick={() => onNavigate('')}>
-                <FaFolder className="text-yellow-500" />
-                <span className="font-medium">Root</span>
-              </button>
-            </div>
-          </div>
-          
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin mr-3" />
-              <span className="text-sm text-gray-500">Loading folders...</span>
-            </div>
-          ) : (
-            rootFolders.map(folder => (
-              <FolderTreeNode
-                key={folder.path}
-                node={folder}
-                currentPath={currentPath}
-                onNavigate={onNavigate}
-                level={0}
-              />
-            ))
-          )}
+
+      <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+        {/* Root item */}
+        <div
+          className={`flex items-center py-1.5 px-2 rounded-xl cursor-pointer transition-colors text-xs ${
+            currentPath === ''
+              ? 'bg-primary/10 text-primary font-semibold'
+              : 'text-base-content/75 hover:bg-base-200/80 hover:text-base-content'
+          }`}
+          onClick={() => onNavigate('')}
+        >
+          <span className="w-4 mr-1" />
+          <FolderIcon className="w-4 h-4 text-primary/80 shrink-0 mr-2" />
+          <span className="font-medium">Root</span>
         </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-8 gap-2 text-base-content/50 text-xs">
+            <span className="loading loading-spinner loading-xs text-primary" />
+            <span>Loading...</span>
+          </div>
+        ) : (
+          rootFolders.map((folder) => (
+            <FolderTreeNode
+              key={folder.path}
+              node={folder}
+              currentPath={currentPath}
+              onNavigate={onNavigate}
+              level={0}
+            />
+          ))
+        )}
       </div>
-    </div>
+    </aside>
   );
 });
 

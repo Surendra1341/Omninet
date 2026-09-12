@@ -21,7 +21,7 @@ const Chat = () => {
   }, []);
 
   return (
-    <div className="relative flex h-[calc(100vh-4.5rem)] w-full overflow-hidden bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl">
+    <div className="relative flex h-[calc(100vh-4.5rem)] w-full overflow-hidden bg-base-100 rounded-2xl border border-base-300 shadow-xs">
       {/* Left Sidebar: Conversation List */}
       <div
         className={`w-full md:w-80 lg:w-96 shrink-0 h-full ${

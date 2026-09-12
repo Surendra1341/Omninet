@@ -27,36 +27,39 @@ function CategoryDropdown({
     }, [isOpen, onToggle]);
 
     return (
-        <div className="flex relative" ref={dropdownRef}>
-            <label htmlFor="search-dropdown" className="mb-2 text-sm font-medium text-gray-900 sr-only  dark:text-white">Category Filter</label>
+        <div className="relative" ref={dropdownRef}>
             <button
                 id="dropdown-button"
                 onClick={onToggle}
-                className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600"
+                className="btn btn-sm join-item bg-base-200/90 border-base-300 text-xs font-semibold text-base-content hover:bg-base-300 shrink-0 gap-2 h-10 px-3.5"
                 type="button"
             >
-                {selectedCategory} 
-                <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <span className="truncate max-w-[120px]">{selectedCategory}</span>
+                <svg className="w-2.5 h-2.5 opacity-60 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                 </svg>
             </button>
-            <div id="dropdown" className={` w-fit min-w-35 absolute top-full left-0 z-50 ${isOpen ? 'block' : 'hidden'} bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 mt-1`}>
-                <ul className="py-2 text-sm w-full text-gray-700 dark:text-gray-200" aria-labelledby="dropdown-button">
+            <div id="dropdown" className={`w-48 absolute top-full left-0 z-50 ${isOpen ? 'block' : 'hidden'} bg-base-100 border border-base-300 rounded-xl shadow-xl p-1 mt-1.5 animate-fadeIn`}>
+                <ul className="text-xs text-base-content space-y-0.5" aria-labelledby="dropdown-button">
                     {loading ? (
-                        <p className="text-center py-10 text-gray-500">
+                        <li className="text-center py-4 text-base-content/50">
                             Loading categories...
-                        </p>
+                        </li>
                     ) : !categories ? (
-                        <div className="text-center py-10 text-gray-500">
+                        <li className="text-center py-4 text-base-content/50">
                             No categories found
-                        </div>
+                        </li>
                     ) : (
                         categories.map((category) => (
-                            <li key={category.id} >
+                            <li key={category.id}>
                                 <button 
                                     type="button" 
                                     onClick={() => onCategorySelect(category.name)} 
-                                    className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-left"
+                                    className={`w-full px-3 py-1.5 rounded-lg text-left transition-colors ${
+                                        selectedCategory === category.name
+                                            ? 'bg-primary/10 text-primary font-semibold'
+                                            : 'hover:bg-base-200 text-base-content'
+                                    }`}
                                 >
                                     {category.name}
                                 </button>
@@ -64,17 +67,20 @@ function CategoryDropdown({
                         ))
                     )}
 
-                    {!categories ? null : (
-                    <li>
-                        <button 
-                            type="button" 
-                            onClick={() => onCategorySelect('All categories')} 
-                            className="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-left"
-                        >
-                            All categories
-                        </button>
-                    </li>
-
+                    {categories && (
+                        <li className="border-t border-base-300/60 pt-1 mt-1">
+                            <button 
+                                type="button" 
+                                onClick={() => onCategorySelect('All categories')} 
+                                className={`w-full px-3 py-1.5 rounded-lg text-left transition-colors ${
+                                    selectedCategory === 'All categories'
+                                        ? 'bg-primary/10 text-primary font-semibold'
+                                        : 'hover:bg-base-200 text-base-content'
+                                }`}
+                            >
+                                All categories
+                            </button>
+                        </li>
                     )}
                 </ul>
             </div>

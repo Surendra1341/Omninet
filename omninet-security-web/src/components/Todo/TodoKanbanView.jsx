@@ -1,25 +1,27 @@
 import React from 'react';
-import FlagIcon from '@mui/icons-material/Flag';
-import RepeatIcon from '@mui/icons-material/Repeat';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {
+  FlagIcon,
+  ArrowPathIcon,
+  CalendarDaysIcon,
+  CheckCircleIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+  CheckIcon
+} from '@heroicons/react/24/outline';
 
 const PRIORITY_STYLES = {
-  URGENT: { label: 'Urgent', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800/60' },
-  HIGH: { label: 'High', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800/60' },
-  MEDIUM: { label: 'Medium', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/60' },
-  LOW: { label: 'Low', color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700' }
+  URGENT: { label: 'Urgent', badge: 'badge-error text-white' },
+  HIGH: { label: 'High', badge: 'badge-warning' },
+  MEDIUM: { label: 'Medium', badge: 'badge-info' },
+  LOW: { label: 'Low', badge: 'badge-ghost' }
 };
 
 const COLUMNS = [
-  { id: 'NOT_STARTED', title: 'To Do', accent: 'border-slate-400', headerBg: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' },
-  { id: 'IN_PROGRESS', title: 'In Progress', accent: 'border-amber-400', headerBg: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400' },
-  { id: 'COMPLETED', title: 'Completed', accent: 'border-emerald-400', headerBg: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' }
+  { id: 'NOT_STARTED', title: 'To Do', badge: 'badge-neutral' },
+  { id: 'IN_PROGRESS', title: 'In Progress', badge: 'badge-warning' },
+  { id: 'COMPLETED', title: 'Completed', badge: 'badge-success text-white' }
 ];
 
 function TodoKanbanView({
@@ -62,12 +64,12 @@ function TodoKanbanView({
         return (
           <div
             key={col.id}
-            className="bg-gray-50/70 dark:bg-gray-900/50 border border-gray-200/80 dark:border-gray-800 rounded-2xl p-4 flex flex-col min-h-[500px]"
+            className="card bg-base-200/40 border border-base-300 rounded-2xl p-4 flex flex-col min-h-[500px]"
           >
             {/* Column Header */}
-            <div className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center justify-between mb-4 border ${col.headerBg}`}>
-              <span>{col.title}</span>
-              <span className="px-2 py-0.5 rounded-full text-xs bg-white/80 dark:bg-gray-800/80 font-semibold shadow-2xs">
+            <div className="px-3 py-2 rounded-xl font-bold text-sm flex items-center justify-between mb-4 border border-base-300 bg-base-100">
+              <span className="text-base-content">{col.title}</span>
+              <span className={`badge badge-sm ${col.badge} font-medium`}>
                 {columnTodos.length}
               </span>
             </div>
@@ -75,7 +77,7 @@ function TodoKanbanView({
             {/* Task Cards */}
             <div className="space-y-3 flex-1 overflow-y-auto">
               {columnTodos.length === 0 ? (
-                <div className="text-center py-12 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl text-xs text-gray-400">
+                <div className="text-center py-12 border-2 border-dashed border-base-300 rounded-xl text-xs text-base-content/40">
                   No tasks in {col.title}
                 </div>
               ) : (
@@ -89,36 +91,36 @@ function TodoKanbanView({
                   return (
                     <div
                       key={todo.id}
-                      className="bg-white dark:bg-gray-800 border border-gray-200/90 dark:border-gray-700/80 rounded-xl p-4 shadow-xs hover:shadow-md transition-all group relative"
+                      className="card bg-base-100 border border-base-300 rounded-xl p-4 shadow-xs hover:shadow-md hover:border-primary/40 transition-all group"
                     >
                       {/* Priority Flag & Top Badges */}
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border ${priority.bg} ${priority.color}`}>
-                          <FlagIcon style={{ fontSize: '0.8rem' }} />
+                        <span className={`badge badge-xs ${priority.badge} gap-1 font-medium`}>
+                          <FlagIcon className="w-2.5 h-2.5" />
                           <span>{priority.label}</span>
                         </span>
 
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
                           {todo.isRecurring && (
-                            <span className="p-1 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-md text-[10px]" title={`Recurring: ${todo.recurrencePattern}`}>
-                              <RepeatIcon style={{ fontSize: '0.9rem' }} />
+                            <span className="p-1 text-primary bg-primary/10 rounded-md text-[10px]" title={`Recurring: ${todo.recurrencePattern}`}>
+                              <ArrowPathIcon className="w-3 h-3" />
                             </span>
                           )}
                           <button
                             type="button"
                             onClick={() => onEdit(todo)}
-                            className="p-1 text-gray-400 hover:text-blue-600 rounded-md transition"
+                            className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-primary rounded-md"
                             title="Edit task"
                           >
-                            <EditOutlinedIcon style={{ fontSize: '1rem' }} />
+                            <PencilSquareIcon className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => onDelete(todo.id)}
-                            className="p-1 text-gray-400 hover:text-red-500 rounded-md transition"
+                            className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-error rounded-md"
                             title="Delete task"
                           >
-                            <DeleteOutlineIcon style={{ fontSize: '1rem' }} />
+                            <TrashIcon className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
@@ -128,24 +130,24 @@ function TodoKanbanView({
                         <button
                           type="button"
                           onClick={() => onToggleStatus(todo)}
-                          className="mt-0.5 text-gray-400 hover:text-emerald-500 transition shrink-0"
+                          className="mt-0.5 text-base-content/40 hover:text-primary transition shrink-0"
                           title={isCompleted ? 'Mark incomplete' : 'Mark completed'}
                         >
                           {isCompleted ? (
-                            <CheckCircleIcon style={{ fontSize: '1.2rem' }} className="text-emerald-500" />
+                            <CheckCircleIcon className="w-4 h-4 text-success stroke-2" />
                           ) : (
-                            <RadioButtonUncheckedIcon style={{ fontSize: '1.2rem' }} />
+                            <span className="w-4 h-4 rounded-full border-2 border-base-content/30 inline-block hover:border-primary" />
                           )}
                         </button>
 
                         <div className="min-w-0 flex-1">
-                          <h4 className={`text-sm font-semibold text-gray-900 dark:text-white leading-snug break-words ${
-                            isCompleted ? 'line-through text-gray-400 dark:text-gray-500' : ''
+                          <h4 className={`text-xs font-semibold text-base-content leading-snug break-words ${
+                            isCompleted ? 'line-through text-base-content/40' : ''
                           }`}>
                             {todo.title}
                           </h4>
                           {todo.description && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
+                            <p className="text-[11px] text-base-content/60 line-clamp-2 mt-1">
                               {todo.description}
                             </p>
                           )}
@@ -155,13 +157,13 @@ function TodoKanbanView({
                       {/* Subtask Progress Bar (if any) */}
                       {subtasks.length > 0 && (
                         <div className="mb-2.5 pt-1">
-                          <div className="flex items-center justify-between text-[11px] text-gray-500 mb-1">
+                          <div className="flex items-center justify-between text-[10px] text-base-content/50 mb-1">
                             <span>Checklist</span>
                             <span className="font-semibold">{completedSubtasks}/{subtasks.length}</span>
                           </div>
-                          <div className="w-full bg-gray-100 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                          <div className="w-full bg-base-200 h-1.5 rounded-full overflow-hidden">
                             <div
-                              className="bg-blue-600 h-full rounded-full transition-all duration-300"
+                              className="bg-primary h-full rounded-full transition-all duration-300"
                               style={{ width: `${Math.round((completedSubtasks / subtasks.length) * 100)}%` }}
                             />
                           </div>
@@ -174,7 +176,7 @@ function TodoKanbanView({
                           {todo.tags.map(t => (
                             <span
                               key={t}
-                              className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                              className="badge badge-xs badge-ghost font-medium"
                             >
                               #{t}
                             </span>
@@ -183,25 +185,25 @@ function TodoKanbanView({
                       )}
 
                       {/* Footer: Due Date & Move Column Actions */}
-                      <div className="pt-2 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs">
+                      <div className="pt-2 border-t border-base-200 flex items-center justify-between text-xs">
                         {dateInfo ? (
-                          <div className={`flex items-center gap-1 font-medium ${
+                          <div className={`flex items-center gap-1 text-[11px] font-medium ${
                             isCompleted
-                              ? 'text-gray-400'
+                              ? 'text-base-content/40'
                               : dateInfo.isPast
-                              ? 'text-red-600 dark:text-red-400'
+                              ? 'text-error'
                               : dateInfo.isToday
-                              ? 'text-amber-600 dark:text-amber-400'
-                              : 'text-gray-500 dark:text-gray-400'
+                              ? 'text-primary'
+                              : 'text-base-content/60'
                           }`}>
-                            <CalendarMonthIcon style={{ fontSize: '0.9rem' }} />
+                            <CalendarDaysIcon className="w-3 h-3" />
                             <span>{dateInfo.label}</span>
                             {dateInfo.isPast && !isCompleted && (
-                              <span className="text-[10px] uppercase font-bold text-red-600">(Overdue)</span>
+                              <span className="text-[9px] uppercase font-bold text-error">(Overdue)</span>
                             )}
                           </div>
                         ) : (
-                          <span className="text-[11px] text-gray-400">No date</span>
+                          <span className="text-[11px] text-base-content/40">No date</span>
                         )}
 
                         {/* Move Column Shortcut Buttons */}
@@ -210,39 +212,39 @@ function TodoKanbanView({
                             <button
                               type="button"
                               onClick={() => onStatusChange(todo.id, 'NOT_STARTED')}
-                              className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
+                              className="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-base-content"
                               title="Move back to To Do"
                             >
-                              <ArrowBackIcon style={{ fontSize: '0.9rem' }} />
+                              <ArrowLeftIcon className="w-3 h-3" />
                             </button>
                           )}
                           {col.id === 'NOT_STARTED' && (
                             <button
                               type="button"
                               onClick={() => onStatusChange(todo.id, 'IN_PROGRESS')}
-                              className="inline-flex items-center gap-0.5 px-2 py-1 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-semibold transition"
+                              className="btn btn-xs btn-ghost text-warning hover:bg-warning/10 gap-0.5 text-[10px] font-medium rounded-lg"
                               title="Start task"
                             >
                               <span>Start</span>
-                              <ArrowForwardIcon style={{ fontSize: '0.75rem' }} />
+                              <ArrowRightIcon className="w-2.5 h-2.5" />
                             </button>
                           )}
                           {col.id === 'IN_PROGRESS' && (
                             <button
                               type="button"
                               onClick={() => onStatusChange(todo.id, 'COMPLETED')}
-                              className="inline-flex items-center gap-0.5 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 rounded-lg text-[10px] font-semibold transition"
+                              className="btn btn-xs btn-ghost text-success hover:bg-success/10 gap-0.5 text-[10px] font-medium rounded-lg"
                               title="Mark complete"
                             >
                               <span>Done</span>
-                              <CheckCircleIcon style={{ fontSize: '0.85rem' }} />
+                              <CheckCircleIcon className="w-3 h-3" />
                             </button>
                           )}
                           {col.id === 'COMPLETED' && (
                             <button
                               type="button"
                               onClick={() => onStatusChange(todo.id, 'IN_PROGRESS')}
-                              className="inline-flex items-center gap-0.5 px-2 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-[10px] font-semibold transition"
+                              className="btn btn-xs btn-ghost text-base-content/60 hover:text-base-content text-[10px] font-medium rounded-lg"
                               title="Reopen task"
                             >
                               <span>Reopen</span>

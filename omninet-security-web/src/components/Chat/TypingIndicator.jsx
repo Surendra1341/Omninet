@@ -14,12 +14,12 @@ const TypingIndicator = ({ typers = [] }) => {
   }
 
   return (
-    <div className="flex items-center gap-2 px-4 py-1.5 text-xs text-slate-400 select-none animate-fade-in">
-      <div className="flex items-center gap-1 bg-slate-800/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-700/50 shadow-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:-0.3s]"></span>
-        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:-0.15s]"></span>
-        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"></span>
-        <span className="ml-1 text-slate-300 font-medium">{label}</span>
+    <div className="flex items-center gap-2 px-5 py-1.5 text-xs text-base-content/60 select-none animate-fade-in">
+      <div className="flex items-center gap-1.5 bg-base-100 px-3 py-1 rounded-full border border-base-300 shadow-2xs">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></span>
+        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]"></span>
+        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce"></span>
+        <span className="ml-1 text-[11px] text-base-content/70 font-medium">{label}</span>
       </div>
     </div>
   );
