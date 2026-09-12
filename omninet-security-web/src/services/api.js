@@ -553,47 +553,120 @@ export const aiChatAPI = {
     return response.data?.data !== undefined ? response.data.data : response.data;
   },
 
- // AI interactions
- sendMessage: async (prompt, sessionId) => {
-   const formData = new FormData();
-   formData.append("prompt", prompt);
-   formData.append("sessionId", sessionId);
+  // AI interactions
+  sendMessage: async (prompt, sessionId, webSearch = true) => {
+    const response = await api.post("/api/ai/chat", {
+      prompt,
+      sessionId,
+      webSearch,
+    });
+    return response.data?.data !== undefined ? response.data.data : response.data;
+  },
 
-   const response = await api.post("/api/ai/chat", formData, {
-     headers: {
-       "Content-Type": "multipart/form-data",
-     },
-   });
-   return response.data;
- },
+  streamChatMessage: async ({ prompt, sessionId, webSearch = true, onToken, onStatus, onCitations, onDone, onError }) => {
+    try {
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+      const url = `${API_BASE_URL}/api/ai/chat/stream`;
 
- sendMessageWithSpeech: async (prompt, sessionId) => {
-   const formData = new FormData();
-   formData.append("prompt", prompt);
-   formData.append("sessionId", sessionId);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ prompt, sessionId, webSearch }),
+      });
 
-   const response = await api.post("/api/ai/chat/speech", formData, {
-     headers: {
-       "Content-Type": "multipart/form-data",
-     },
-     responseType: "blob",
-   });
-   return response.data;
- },
+      if (!response.ok) {
+        throw new Error(`Streaming failed: HTTP ${response.status}`);
+      }
 
- sendVoiceMessage: async (audioFile, sessionId) => {
-   const formData = new FormData();
-   formData.append("audio", audioFile);
-   formData.append("sessionId", sessionId);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
 
-   const response = await api.post("/api/ai/chat/voice", formData, {
-     headers: {
-       "Content-Type": "multipart/form-data",
-     },
-     responseType: "blob",
-   });
-   return response.data;
- },
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const block of lines) {
+          if (!block.trim()) continue;
+          let eventName = "message";
+          let dataStr = "";
+
+          const eventMatch = block.match(/event:\s*([^\n]+)/);
+          if (eventMatch) eventName = eventMatch[1].trim();
+
+          const dataMatch = block.match(/data:\s*([^\n]+)/);
+          if (dataMatch) dataStr = dataMatch[1].trim();
+
+          if (eventName === "token") {
+            onToken && onToken(dataStr);
+          } else if (eventName === "status") {
+            onStatus && onStatus(dataStr);
+          } else if (eventName === "citations") {
+            try {
+              const citList = JSON.parse(dataStr);
+              onCitations && onCitations(citList);
+            } catch (e) {}
+          } else if (eventName === "done") {
+            onDone && onDone(dataStr);
+          } else if (eventName === "error") {
+            onError && onError(dataStr);
+          }
+        }
+      }
+    } catch (err) {
+      onError && onError(err.message);
+    }
+  },
+
+  editChatMessage: async (messageId, { prompt, sessionId, webSearch = true }) => {
+    const response = await api.post(`/api/ai/chat/messages/${messageId}/edit`, {
+      prompt,
+      sessionId,
+      webSearch,
+    });
+    return response.data?.data !== undefined ? response.data.data : response.data;
+  },
+
+  getUserMemories: async () => {
+    const response = await api.get("/api/ai/chat/memory");
+    return response.data?.data !== undefined ? response.data.data : response.data;
+  },
+
+  deleteUserMemory: async (id) => {
+    const response = await api.delete(`/api/ai/chat/memory/${id}`);
+    return response.data;
+  },
+
+  sendMessageWithSpeech: async (prompt, sessionId) => {
+    const response = await api.post("/api/ai/chat/speech", {
+      prompt,
+      sessionId,
+    }, {
+      responseType: "blob",
+    });
+    return response.data;
+  },
+
+  sendVoiceMessage: async (audioFile, sessionId) => {
+    const formData = new FormData();
+    formData.append("audio", audioFile);
+    if (sessionId) formData.append("sessionId", sessionId);
+
+    const response = await api.post("/api/ai/chat/voice", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      responseType: "blob",
+    });
+    return response.data;
+  },
 };
 
 export default api;

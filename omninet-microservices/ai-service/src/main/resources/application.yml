@@ -45,15 +45,16 @@ spring:
         spring.json.add.type.headers: false
 
 ai:
-  provider: ${AI_PROVIDER:ollama}
+  provider: ${AI_PROVIDER:gemini}
 
 gemini:
   api-key: ${GEMINI_API_KEY:}
-  model: ${GEMINI_MODEL:gemini-1.5-flash}
+  model: ${GEMINI_MODEL:gemini-3.7-flash}
+  backup-models: ${GEMINI_BACKUP_MODELS:gemini-flash-latest,gemini-3.5-flash,gemini-3.6-flash}
 
 ollama:
   url: ${OLLAMA_URL:http://localhost:11434}
-  model: ${OLLAMA_MODEL:llama3.2}
+  model: ${OLLAMA_MODEL:deepseek-coder:6.7b}
 
 grpc:
   client:

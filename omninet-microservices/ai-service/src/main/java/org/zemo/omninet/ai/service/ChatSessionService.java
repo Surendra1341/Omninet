@@ -12,6 +12,7 @@ import org.zemo.omninet.ai.repository.ChatMessageRepository;
 import org.zemo.omninet.ai.repository.ChatSessionRepository;
 import org.zemo.omninet.common.exception.ResourceNotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,6 @@ public class ChatSessionService {
     }
 
     public List<ChatMessageDto> getSessionMessages(Long sessionId, String userId) {
-        // Validate access
         getSessionEntity(sessionId, userId);
         return chatMessageRepository.findByChatSessionIdOrderByCreatedAtAsc(sessionId)
                 .stream()
@@ -58,25 +58,79 @@ public class ChatSessionService {
         return chatMessageRepository.findByChatSessionIdOrderByCreatedAtAsc(session.getId());
     }
 
+    public List<ChatMessage> getSlidingWindowMessages(ChatSession session, int maxCount) {
+        List<ChatMessage> all = chatMessageRepository.findByChatSessionIdOrderByCreatedAtAsc(session.getId());
+        if (all.size() <= maxCount) {
+            return all;
+        }
+        return all.subList(all.size() - maxCount, all.size());
+    }
+
     @Transactional
     public ChatMessage addMessage(ChatSession session, ChatMessage.MessageType type, String content, String audioFilePath) {
+        return addMessage(session, type, content, audioFilePath, null);
+    }
+
+    @Transactional
+    public ChatMessage addMessage(ChatSession session, ChatMessage.MessageType type, String content, String audioFilePath, String citationsJson) {
         ChatMessage message = ChatMessage.builder()
                 .chatSession(session)
                 .type(type)
                 .content(content)
                 .audioFilePath(audioFilePath)
+                .citations(citationsJson)
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(message);
 
         // Update session title automatically if this is the first message
         if ("New Conversation".equals(session.getTitle()) && content != null && !content.isBlank()) {
-            String snippet = content.length() > 30 ? content.substring(0, 30) + "..." : content;
+            String snippet = content.length() > 32 ? content.substring(0, 32) + "..." : content;
             session.setTitle(snippet);
             chatSessionRepository.save(session);
         }
 
         return saved;
+    }
+
+    @Transactional
+    public ChatMessage editAndPrepareResend(Long sessionId, Long messageId, String newContent, String userId) {
+        ChatSession session = getSessionEntity(sessionId, userId);
+        List<ChatMessage> all = chatMessageRepository.findByChatSessionIdOrderByCreatedAtAsc(session.getId());
+
+        int targetIndex = -1;
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).getId().equals(messageId)) {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        if (targetIndex == -1) {
+            throw new ResourceNotFoundException("Message not found in session: " + messageId);
+        }
+
+        ChatMessage targetMsg = all.get(targetIndex);
+        targetMsg.setContent(newContent);
+        targetMsg.setIsEdited(true);
+        chatMessageRepository.save(targetMsg);
+
+        // Truncate/delete all subsequent messages after this point so a fresh AI response is generated
+        if (targetIndex < all.size() - 1) {
+            List<ChatMessage> toDelete = new ArrayList<>(all.subList(targetIndex + 1, all.size()));
+            chatMessageRepository.deleteAll(toDelete);
+        }
+
+        return targetMsg;
+    }
+
+    @Transactional
+    public void updateSessionTitle(Long sessionId, String title, String userId) {
+        ChatSession session = getSessionEntity(sessionId, userId);
+        if (title != null && !title.isBlank()) {
+            session.setTitle(title.trim());
+            chatSessionRepository.save(session);
+        }
     }
 
     @Transactional

@@ -17,6 +17,9 @@ public class ChatMessageDto {
     private ChatMessage.MessageType type;
     private String content;
     private String audioFilePath;
+    private String citations;
+    private Boolean isEdited;
+    private Long parentMessageId;
     private LocalDateTime createdAt;
 
     public static ChatMessageDto fromEntity(ChatMessage entity) {
@@ -26,6 +29,9 @@ public class ChatMessageDto {
                 .type(entity.getType())
                 .content(entity.getContent())
                 .audioFilePath(entity.getAudioFilePath())
+                .citations(entity.getCitations())
+                .isEdited(entity.getIsEdited())
+                .parentMessageId(entity.getParentMessageId())
                 .createdAt(entity.getCreatedAt())
                 .build();
     }

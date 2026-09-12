@@ -207,9 +207,17 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       STORAGE_GRPC_HOST: storage-service
       STORAGE_GRPC_PORT: 9095
-      AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxRAMPercentage=75.0 -Djava.net.preferIPv4Stack=true"
+      AI_PROVIDER: ${AI_PROVIDER:-gemini}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.7-flash}
       OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-deepseek-coder:6.7b}
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy

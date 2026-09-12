@@ -18,4 +18,5 @@ public class ChatRequest {
     private Long sessionId;
     private String model;
     private Boolean stream;
+    private Boolean webSearch;
 }

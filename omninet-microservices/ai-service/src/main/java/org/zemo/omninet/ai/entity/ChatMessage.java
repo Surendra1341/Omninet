@@ -38,6 +38,16 @@ public class ChatMessage {
     @Column(name = "audio_file_path")
     private String audioFilePath;
 
+    @Column(name = "citations", columnDefinition = "TEXT")
+    private String citations;
+
+    @Column(name = "is_edited")
+    @Builder.Default
+    private Boolean isEdited = false;
+
+    @Column(name = "parent_message_id")
+    private Long parentMessageId;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
