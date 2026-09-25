@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'OmniNet',
   description: 'A production-grade distributed microservices platform — Notes, Storage, AI Chat, and more.',
   base: '/Omninet/',
@@ -115,4 +116,27 @@ export default defineConfig({
   markdown: {
     lineNumbers: true,
   },
-})
+
+  mermaid: {
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#6366f1',
+      primaryTextColor: '#fff',
+      primaryBorderColor: '#4f46e5',
+      lineColor: '#94a3b8',
+      secondaryColor: '#1e293b',
+      tertiaryColor: '#0f172a',
+      background: '#0f172a',
+      mainBkg: '#1e293b',
+      nodeBorder: '#4f46e5',
+      clusterBkg: '#1e293b',
+      titleColor: '#e2e8f0',
+      edgeLabelBackground: '#1e293b',
+      fontFamily: 'Inter, ui-sans-serif, system-ui',
+    },
+  },
+
+  mermaidPlugin: {
+    class: 'mermaid',
+  },
+}))

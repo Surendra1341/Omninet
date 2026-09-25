@@ -32,17 +32,17 @@ The storage service manages all file operations, including uploads, downloads, f
 
 ```mermaid
 sequenceDiagram
-    participant Browser
+    participant Browser as Browser
     participant Gateway as API Gateway
-    participant Storage as storage-service
-    participant MinIO
+    participant Storage as Storage Service
+    participant MinIO as MinIO
 
     Browser->>Gateway: POST /api/v1/storage/files/upload-url
-    Gateway->>Storage: Forward request (with X-User-Id)
-    Storage->>MinIO: Generate presigned PUT URL (signed for public endpoint)
-    Storage->>Browser: Return { uploadUrl, fileKey }
+    Gateway->>Storage: Forward (with X-User-Id)
+    Storage->>MinIO: Generate presigned PUT URL
+    Storage->>Browser: Return uploadUrl + fileKey
     Browser->>MinIO: PUT file directly to presigned URL
-    MinIO->>Browser: 200 OK (ETag)
+    MinIO->>Browser: 200 OK + ETag
 ```
 
 ## S3 Client Configuration

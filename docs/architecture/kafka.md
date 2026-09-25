@@ -16,21 +16,22 @@ OmniNet uses **Apache Kafka** in KRaft mode (no ZooKeeper) for asynchronous, dec
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant Auth as auth-service
-    participant Kafka
-    participant Storage as storage-service
-    participant Notes as notes-service
+    participant Client as Browser
+    participant Auth as Auth Service
+    participant Kafka as Kafka
+    participant Storage as Storage Service
+    participant Notes as Notes Service
 
     Client->>Auth: POST /api/v1/auth/register
     Auth->>Auth: Create user, send OTP email
     Auth->>Kafka: Publish USER_CREATED event
 
-    par Kafka Fan-out
+    par Fan-out to Storage
         Kafka->>Storage: Consume USER_CREATED
-        Storage->>Storage: Create S3 folders (notes/, audio/, uploads/)
+        Storage->>Storage: Create S3 folders
+    and Fan-out to Notes
         Kafka->>Notes: Consume USER_CREATED
-        Notes->>Notes: Create default categories (General, Work, Personal)
+        Notes->>Notes: Create default categories
     end
 ```
 
