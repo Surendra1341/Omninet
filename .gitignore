@@ -8,7 +8,7 @@
 .env
 .env.*
 *.env
-.Omninet_Recovered_Full_Chat.md
+
 Omninet_Recovered_Full_Chat.md
 *.env.local
 *.env.*.local
@@ -142,6 +142,22 @@ dist-ssr/
 .eslintcache
 *.tsbuildinfo
 .turbo/
+
+# ------------------------------------------------------------------------------
+# VitePress Documentation
+# ------------------------------------------------------------------------------
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Root-level temporary/generated markdown files
+Omninet_Recovered_Full_Chat.md
+implementation_plan.md
+task.md
+walkthrough.md
+
+# Root-level npm (VitePress tooling)
+/node_modules/
+/package-lock.json
 
 # ------------------------------------------------------------------------------
 # Docker, Containers & Local Infrastructure Volumes
